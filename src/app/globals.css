@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --paper: #f4f6f3;
+  --surface: #ffffff;
+  --surface-2: #eaefea;
+  --ink: #1b2521;
+  --ink-soft: #5b6b62;
+  --line: #d7ded8;
+  --line-strong: #bbc7bf;
+  --accent: #1e6f5c;
+  --income: #1e6f5c;
+  --income-bg: #e4f1ec;
+  --outcome: #ad5a26;
+  --outcome-bg: #f7e9dd;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0f1e1a;
+    --surface: #15281f;
+    --surface-2: #1b3229;
+    --ink: #e7eee9;
+    --ink-soft: #93a79e;
+    --line: #2a4038;
+    --line-strong: #3b594e;
+    --accent: #57d8af;
+    --income: #57d8af;
+    --income-bg: #173328;
+    --outcome: #e79a63;
+    --outcome-bg: #33231a;
+  }
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+@layer components {
+  .input {
+    @apply w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-accent;
+  }
+  .btn-primary {
+    @apply w-full rounded-md bg-accent px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50;
+  }
+}
