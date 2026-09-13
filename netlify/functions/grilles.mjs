@@ -66,8 +66,18 @@ async function airtable(path, init = {}) {
 /* Un champ « choix unique » revient en objet, s'écrit en chaîne. */
 const name = v => (v && typeof v === "object" ? v.name : v) || "";
 
+/* Ceinture et bretelles : on lit indifféremment les champs indexés par
+   identifiant ou par nom, selon ce que renvoie l'API. */
+const BY_NAME = { nom:"Nom", resume:"Résumé", tonique:"Tonique", mode:"Mode",
+  tempo:"Tempo", accords:"Accords", notes:"Notes", cree:"Créé le",
+  type:"Type", createur:"Créateur", favori:"Favori" };
+
 function toItem(rec) {
-  const f = rec.fields || {};
+  const raw = rec.fields || {};
+  const f = new Proxy({}, { get: (_, k) => {
+    const hit = Object.keys(F).find(n => F[n] === k);
+    return raw[k] !== undefined ? raw[k] : (hit ? raw[BY_NAME[hit]] : undefined);
+  }});
   let accords = [];
   try { accords = JSON.parse(f[F.accords] || "[]"); } catch { accords = []; }
   return {
@@ -123,7 +133,10 @@ export default async (req) => {
 
   try {
     if (req.method === "GET") {
-      const qs = new URLSearchParams({ pageSize: "100" });
+      /* Sans returnFieldsByFieldId, Airtable renvoie les champs indexés par
+         NOM — alors qu'on les écrit par identifiant. Les deux doivent
+         concorder, sinon tout revient vide. */
+      const qs = new URLSearchParams({ pageSize: "100", returnFieldsByFieldId: "true" });
       qs.append("sort[0][field]", F.cree);
       qs.append("sort[0][direction]", "desc");
       const data = await airtable(`${BASE}/${TABLE}?${qs}`);
@@ -136,7 +149,7 @@ export default async (req) => {
       const body = await req.json();
       const data = await airtable(`${BASE}/${TABLE}`, {
         method: "POST",
-        body: JSON.stringify({ records: [{ fields: toFields(body) }] })
+        body: JSON.stringify({ records: [{ fields: toFields(body) }], returnFieldsByFieldId: true })
       });
       return json({ item: toItem(data.records[0]) }, 201);
     }
@@ -146,7 +159,7 @@ export default async (req) => {
       const body = await req.json();
       const data = await airtable(`${BASE}/${TABLE}`, {
         method: "PATCH",
-        body: JSON.stringify({ records: [{ id, fields: toFields(body, { partial: true }) }] })
+        body: JSON.stringify({ records: [{ id, fields: toFields(body, { partial: true }) }], returnFieldsByFieldId: true })
       });
       return json({ item: toItem(data.records[0]) });
     }

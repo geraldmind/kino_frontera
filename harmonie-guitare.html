@@ -272,6 +272,13 @@ dialog#ask::backdrop{background:rgba(10,7,5,.62)}
 .det-b{display:flex;gap:3px}
 .det-b button{flex:1;background:transparent;border:1px solid var(--line-soft);color:var(--ink-dim);border-radius:2px;font-size:11px;padding:4px 0;cursor:pointer;font-family:var(--ui)}
 .det-b button:hover{color:var(--ink);border-color:var(--T)}
+.det-q{border-top:1px solid var(--line-soft);padding-top:8px;display:flex;flex-wrap:wrap;gap:3px}
+.det-q p{width:100%;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim);font-weight:600;margin:0 0 4px}
+.det-q button{background:transparent;border:1px solid var(--line-soft);color:var(--ink-mute);border-radius:2px;
+  font-size:11px;padding:3px 7px;cursor:pointer;font-family:var(--ui);font-weight:600}
+.det-q button:hover{color:var(--ink);border-color:var(--T)}
+.det-q button[aria-pressed="true"]{background:var(--T);border-color:var(--T);color:var(--on-accent)}
+.det-b button[disabled]{opacity:1;cursor:default;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-dim);border-color:transparent}
 .det-alt{border-top:1px solid var(--line-soft);padding-top:8px}
 .det-alt p{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim);font-weight:600;margin:0 0 6px}
 .det-alt button{display:block;width:100%;text-align:left;background:transparent;border:1px solid var(--line-soft);
@@ -290,7 +297,9 @@ dialog#ask::backdrop{background:rgba(10,7,5,.62)}
 .now-lab{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-dim);font-weight:600;margin:0 0 2px}
 .now-chord{font-family:var(--display);font-size:52px;font-weight:600;line-height:1;margin:0;color:var(--T)}
 .now-next{font-family:var(--display);font-size:26px;font-weight:600;line-height:1;margin:0;color:var(--ink-mute)}
-#pathNow svg{max-width:124px}
+#pathNow > div{flex:0 0 auto}
+#pathNow svg{width:132px;height:auto;display:block}
+#pathNow .next-d svg{width:96px;opacity:.75}
 .now-beat{display:flex;gap:5px;margin-top:8px}
 .now-beat i{width:9px;height:9px;border-radius:50%;background:var(--line);display:block}
 .now-beat i.on{background:var(--T)}
@@ -337,7 +346,7 @@ footer{margin-top:40px;color:var(--ink-dim);font-size:12.5px}
       <label class="field"><span>Créateur</span><select id="createur"></select></label>
       <button type="button" class="btn" id="theme" title="Jour / nuit">☀︎ Jour</button>
       <label class="field"><span>Timbre</span>
-        <select id="tone"><option value="nylon">Classique (nylon)</option><option value="steel">Folk (acier)</option><option value="bass">Basse</option><option value="piano">Piano</option><option value="violin">Violon</option><option value="trumpet">Trompette</option></select>
+        <select id="tone"><option value="nylon">Classique (nylon)</option><option value="steel">Folk (acier)</option><option value="electric">Électrique</option></select>
       </label>
     </div>
     <div class="tabs" role="tablist">
@@ -745,21 +754,9 @@ const TONE={
  steel:{kind:"pluck",n:"Folk (acier)",damp:0.9968,loop:0.66,noise:0.20,pick:0.11,
         bright:4300,dur:3.8,spread:0.028,gain:0.8,
         body:[[104,1.2,1.0],[230,1.6,1.5],[520,1.2,1.8]]},
- bass:{kind:"pluck",n:"Basse",damp:0.9988,loop:0.30,noise:0.16,pick:0.22,
-        bright:1150,dur:4.2,spread:0.05,gain:1.1,shift:-12,low:2,
-        body:[[78,2.2,0.8],[190,1.0,1.3]]},
- /* un piano acoustique, c'est deux à trois cordes par note, très légèrement
-    désaccordées : ce battement lent est ce qui le distingue d'un Rhodes.
-    Et la note s'éteint vite — d'où la décroissance à deux pentes.        */
- piano:{kind:"piano",n:"Piano",dur:2.6,spread:0.009,gain:0.9,bright:4800,
-        partials:12,inh:0.0004,decay:1.5,fast:0.22,fastMix:0.42,
-        unison:[0,0.55,-0.55],body:[[190,1.4,1.1],[950,0.8,1.6]]},
- violin:{kind:"bow",n:"Violon",spread:0.05,gain:0.30,attack:0.10,release:0.22,
-         bright:2500,vib:5.3,vibC:9,vibDelay:0.22,maxVoices:4,hold:1.15,fade:0.55,
-         body:[[300,4.5,1.2],[700,3.5,1.4],[2800,3,2.2]]},
- trumpet:{kind:"brass",n:"Trompette",spread:0.035,gain:0.26,attack:0.018,release:0.16,
-          bright:3200,vib:5.6,vibC:5,vibDelay:0.3,maxVoices:3,hold:1.1,fade:0.7,
-          blat:2.1,body:[[1150,5,1.5],[2300,3,2]]}
+ electric:{kind:"pluck",n:"Électrique",damp:0.9986,loop:0.70,noise:0.11,pick:0.15,
+        bright:3300,dur:4.6,spread:0.020,gain:0.95,drive:1.7,
+        body:[[240,1.0,1.2],[880,2.2,1.3],[2400,2.4,1.6]]}
 };
 let AC=null,soundOn=false,toneKey="nylon",master=null,bufCache={},ringing=[];
 function ensureAC(){
@@ -787,9 +784,6 @@ function ensureAC(){
     ls.connect(conv); conv.connect(wet); wet.connect(lim);
   }
   if(AC.state==="suspended") AC.resume();
-  /* la basse descend sous le coupe-bas prévu pour la guitare */
-  if(AC._hp) AC._hp.frequency.value = toneKey==="bass"?42:95;
-  if(AC._chain) AC._chain.gain.value = toneKey==="bass"?-1:-4.5;
   return AC;
 }
 /* --- corde pincée : Karplus-Strong à délai fractionnaire --- */
@@ -813,36 +807,6 @@ function stringBuffer(midi){
   }
   return finish(buf,d,len,sr);
 }
-/* --- piano : synthèse additive, partiels inharmoniques qui meurent
-       d'autant plus vite qu'ils sont aigus, plus le bruit du marteau --- */
-function pianoBuffer(midi){
-  const T=TONE[toneKey],sr=AC.sampleRate,f=440*Math.pow(2,(midi-69)/12);
-  const len=Math.floor(sr*T.dur),buf=AC.createBuffer(1,len,sr),d=buf.getChannelData(0);
-  const base=T.decay*Math.pow(2,(60-midi)/24);
-  const uni=T.unison||[0];
-  for(let n=1;n<=T.partials;n++){
-    const fn0=f*n*Math.sqrt(1+T.inh*n*n);
-    if(fn0>sr*0.45) break;
-    const amp=Math.pow(n,-1.55)*(n%2?1:0.62)/uni.length;
-    const slow=base/(1+0.55*(n-1)), fast=T.fast/(1+0.6*(n-1));
-    for(let u=0;u<uni.length;u++){
-      const fn=fn0*Math.pow(2,uni[u]/1200);     // désaccord en cents
-      const w=2*Math.PI*fn/sr, ph=Math.random()*6.283;
-      for(let q=0;q<len;q++){
-        const e=(1-T.fastMix)*Math.exp(-q/(sr*slow))+T.fastMix*Math.exp(-q/(sr*fast));
-        if(e<0.0002) break;
-        d[q]+=amp*e*Math.sin(w*q+ph);
-      }
-    }
-  }
-  let nz=0;
-  const hammer=Math.floor(sr*0.009);            // le feutre qui frappe
-  for(let q=0;q<hammer;q++){
-    nz+=((Math.random()*2-1)-nz)*0.62;
-    d[q]+=nz*0.42*(1-q/hammer);
-  }
-  return finish(buf,d,len,sr);
-}
 function finish(buf,d,len,sr){
   let mx=0; for(let q=0;q<len;q++){const a=Math.abs(d[q]); if(a>mx) mx=a;}
   if(mx>0) for(let q=0;q<len;q++) d[q]*=0.82/mx;
@@ -852,8 +816,20 @@ function finish(buf,d,len,sr){
 }
 function toneBuffer(midi){
   const key=toneKey+":"+midi; if(bufCache[key]) return bufCache[key];
-  const b=TONE[toneKey].kind==="piano"?pianoBuffer(midi):stringBuffer(midi);
-  bufCache[key]=b; return b;
+  const b=stringBuffer(midi); bufCache[key]=b; return b;
+}
+/* un micro électromagnétique compresse et arrondit les crêtes */
+let driveCurve=null;
+function saturation(amount){
+  if(!driveCurve){
+    driveCurve=new Float32Array(1024);
+    for(let k=0;k<1024;k++){const x=(k/512)-1; driveCurve[k]=Math.tanh(x*2.2)/Math.tanh(2.2);}
+  }
+  const ws=AC.createWaveShaper(); ws.curve=driveCurve; ws.oversample="2x";
+  const pre=AC.createGain(); pre.gain.value=amount;
+  const post=AC.createGain(); post.gain.value=1/amount;
+  pre.connect(ws); ws.connect(post);
+  return {in:pre,out:post};
 }
 function shape(node,T){
   T.body.forEach(b=>{
@@ -869,50 +845,18 @@ function register(src,g){
 }
 /* --- note percutée (corde, basse, piano) --- */
 function struck(midi,t,gain,str,T){
-  const src=AC.createBufferSource(); src.buffer=toneBuffer(midi+(T.shift||0));
+  const src=AC.createBufferSource(); src.buffer=toneBuffer(midi);
   src.playbackRate.value=1+(Math.random()-0.5)*0.0015;
   const lp=AC.createBiquadFilter(); lp.type="lowpass";
   lp.frequency.value=T.bright*(0.85+Math.random()*0.3); lp.Q.value=0.5;
   src.connect(lp);
-  const end=shape(lp,T);
+  let end=shape(lp,T);
+  if(T.drive){ const d=saturation(T.drive); end.connect(d.in); end=d.out; }
   const g=AC.createGain(),v=(gain||0.11)*T.gain*3.1*(0.92+Math.random()*0.16);
   g.gain.setValueAtTime(0.0001,t);
   g.gain.linearRampToValueAtTime(v,t+0.006);
   end.connect(g);
   out(g,str); src.start(t); register(src,g);
-}
-/* --- note tenue (violon, trompette) : archet ou souffle --- */
-function sustained(midi,t,gain,dur,str,T){
-  const f=440*Math.pow(2,(midi-69)/12);
-  const o=AC.createOscillator(); o.type="sawtooth"; o.frequency.value=f;
-  o.detune.value=(Math.random()-0.5)*6;
-  const lfo=AC.createOscillator(),lg=AC.createGain();
-  lfo.frequency.value=T.vib*(0.94+Math.random()*0.12);
-  lg.gain.setValueAtTime(0,t);
-  lg.gain.setValueAtTime(0,t+T.vibDelay);
-  lg.gain.linearRampToValueAtTime(T.vibC,t+T.vibDelay+0.35);
-  lfo.connect(lg); lg.connect(o.detune);
-  const lp=AC.createBiquadFilter(); lp.type="lowpass"; lp.Q.value=0.7;
-  lp.frequency.setValueAtTime(T.bright*0.3,t);
-  if(T.blat){                                   /* le coup de langue du cuivre */
-    lp.frequency.linearRampToValueAtTime(T.bright*T.blat,t+T.attack);
-    lp.frequency.exponentialRampToValueAtTime(T.bright,t+T.attack+0.16);
-  }else lp.frequency.linearRampToValueAtTime(T.bright,t+T.attack*1.8);
-  o.connect(lp);
-  const end=shape(lp,T);
-  const g=AC.createGain(),v=(gain||0.11)*T.gain*3.1;
-  /* une note tenue doit quand même décroître, sinon elle ronronne */
-  const stop=t+Math.max(0.25,Math.min(dur,T.hold||dur));
-  g.gain.setValueAtTime(0.0001,t);
-  g.gain.exponentialRampToValueAtTime(v*(T.blat?1.35:1.1),t+T.attack);
-  g.gain.exponentialRampToValueAtTime(v*0.82,t+T.attack+0.18);
-  g.gain.exponentialRampToValueAtTime(v*(T.fade||0.7),Math.max(t+T.attack+0.2,stop));
-  g.gain.exponentialRampToValueAtTime(0.0001,stop+T.release);
-  end.connect(g);
-  out(g,str);
-  o.start(t); lfo.start(t);
-  o.stop(stop+T.release+0.05); lfo.stop(stop+T.release+0.05);
-  register(o,g);
 }
 function out(g,str){
   if(AC.createStereoPanner&&str!==undefined){
@@ -920,10 +864,12 @@ function out(g,str){
     g.connect(pan); pan.connect(master);
   }else g.connect(master);
 }
-function pluck(midi,t,gain,str,dur){
-  const T=TONE[toneKey];
-  if(T.kind==="bow"||T.kind==="brass") sustained(midi,t,gain,dur||1.4,str,T);
-  else struck(midi,t,gain,str,T);
+function pluck(midi,t,gain,str,dur){ struck(midi,t,gain,str,TONE[toneKey]); }
+/* une note seule : lecture des gammes */
+function note(midi,t,vol,dur){
+  if(!soundOn) return;
+  ensureAC();
+  pluck(midi,t===undefined?AC.currentTime+0.02:t,vol||0.1,undefined,dur);
 }
 function silence(){
   if(typeof stopLoop==="function") stopLoop();
@@ -949,8 +895,6 @@ function voicesOf(frets,up){
   const idx=frets.map((f,i)=>({f,i})).filter(o=>o.f!==null);
   if(!idx.length) return [];
   if(up) return idx.slice(-3).reverse();
-  if(T.low) return idx.slice(0,T.low);
-  if(T.maxVoices) return idx.slice(-T.maxVoices);
   return idx;
 }
 function strum(frets,when,up,vol,dur){
@@ -958,27 +902,17 @@ function strum(frets,when,up,vol,dur){
   ensureAC();
   const T=TONE[toneKey],t0=(when===undefined?AC.currentTime+0.02:when);
   const order=voicesOf(frets,up); if(!order.length) return;
-  const share=T.maxVoices?1/Math.sqrt(order.length):1;
   let t=t0;
   order.forEach((o,k)=>{
-    pluck(OPEN_MIDI[o.i]+o.f,t,(vol||0.11)*share*(k===0?1.15:0.94+Math.random()*0.12),o.i,dur);
+    pluck(OPEN_MIDI[o.i]+o.f,t,(vol||0.11)*(k===0?1.15:0.94+Math.random()*0.12),o.i,dur);
     t+=(up?T.spread*0.55:T.spread)*(0.8+Math.random()*0.4);
   });
 }
 function arpeggio(frets,t0,dur,vol){
   if(!soundOn) return;
   ensureAC();
-  const T=TONE[toneKey];
   const idx=frets.map((f,i)=>({f,i})).filter(o=>o.f!==null);
   if(!idx.length) return;
-  if(T.low){                       /* la basse marche, elle n'arpège pas */
-    const n=Math.max(2,Math.round(dur/0.6));
-    for(let k=0;k<n;k++){
-      const o=idx[k%2===0?0:Math.min(idx.length-1,2)];
-      pluck(OPEN_MIDI[o.i]+o.f,t0+k*(dur/n),(vol||0.11)*(k?0.85:1.2),o.i,dur/n);
-    }
-    return;
-  }
   const bass=idx[0],rest=idx.slice(1);
   const seq=[bass].concat(rest).concat(rest.slice(0,-1).reverse());
   const step=dur/Math.max(4,seq.length);
@@ -1390,8 +1324,8 @@ function startLoop(){
       if(playMode==="arp") arpeggio(p.frets,t,dur*0.95,0.11);
       else{
         strum(p.frets,t,false,0.12,dur*0.92);
-        if(beatsPerChord>=4&&TONE[toneKey].kind==="pluck") strum(p.frets,t+dur*0.5,true,0.07);
-        if(beatsPerChord>=8&&TONE[toneKey].kind==="pluck") strum(p.frets,t+dur*0.75,true,0.055);
+        if(beatsPerChord>=4) strum(p.frets,t+dur*0.5,true,0.07);
+        if(beatsPerChord>=8) strum(p.frets,t+dur*0.75,true,0.055);
       }
       const delay=Math.max(0,(t-AC.currentTime)*1000);
       setTimeout(()=>{document.querySelectorAll(".prog-slot").forEach((s,k)=>s.classList.toggle("playing",k===i));},delay);
@@ -1912,11 +1846,13 @@ function stopPath(){
 function showNow(cur,next,beat,beats){
   const v=voicings(cur.pc,cur.q,cur.flat)[0];
   $("#pathNow").hidden=false;
+  const vn=next?voicings(next.pc,next.q,next.flat)[0]:null;
   $("#pathNow").innerHTML=`
     <div>${v?diagram(v):""}</div>
     <div><p class="now-lab">Maintenant</p><p class="now-chord">${fmt(cname(cur.pc,cur.q,cur.flat))}</p>
       <div class="now-beat">${Array.from({length:beats},(_,k)=>`<i class="${k===beat?"on":""}"></i>`).join("")}</div></div>
-    <div><p class="now-lab">Ensuite</p><p class="now-next">${next?fmt(cname(next.pc,next.q,next.flat)):"—"}</p></div>`;
+    <div><p class="now-lab">Ensuite</p><p class="now-next">${next?fmt(cname(next.pc,next.q,next.flat)):"—"}</p>
+      <div class="next-d">${vn?diagram(vn):""}</div></div>`;
 }
 function pathBeat(i,beats,cur,next){
   const els=document.querySelectorAll(".path-step");
@@ -2074,13 +2010,13 @@ function playList(items,sel,btn){
   detTimers.push(setTimeout(stopDet,(t0-AC.currentTime+items.length*step)*1000+300));
 }
 async function saveDraft(item){
-  const accords=mesDraft.map(a=>({tag:a.tag,pc:a.pc,q:a.q,flat:!!a.flat,
+  const accords=mesDraft.map(a=>({tag:a.tag,pc:a.pc,q:a.q,flat:!!a.flat,vi:a.vi||0,
     nom:cname(a.pc,a.q,a.flat),frets:(a.frets||[]).map(f=>f===null?-1:f)}));
   item.accords=accords; item.resume=accords.map(a=>a.nom).join(" – ");
   await patchGrid(item,{accords,resume:item.resume});
 }
 function renderDetail(item){
-  mesDraft=(item.accords||[]).map(a=>({tag:a.tag,pc:a.pc,q:a.q,flat:a.flat,
+  mesDraft=(item.accords||[]).map(a=>({tag:a.tag,pc:a.pc,q:a.q,flat:a.flat,vi:a.vi||0,
     nom:a.nom,frets:(a.frets||[]).map(f=>f===-1?null:f)}));
   const refresh=()=>{renderDetail(item);};
   $("#mesList").innerHTML=`
@@ -2098,17 +2034,25 @@ function renderDetail(item){
       <button type="button" class="btn danger" id="detDel">Supprimer</button>
     </div>
     <div class="det-chords">${mesDraft.map((a,i)=>{
-      const v=voicings(a.pc,a.q,a.flat)[0];
+      const vs=voicings(a.pc,a.q,a.flat);
+      const v=vs[Math.min(a.vi||0,vs.length-1)];
       const alts=alternatives(mesDraft[i-1],a,mesDraft[i+1]);
       return `<div class="det-c" data-i="${i}">
         <div class="det-n">${fmt(cname(a.pc,a.q,a.flat))}<span>${a.tag||""}</span></div>
         ${v?diagram(v):""}
+        <div class="det-b">
+          <button type="button" data-vi="${i}:-1" title="Doigté précédent">◂</button>
+          <button type="button" data-vlab="${i}" disabled>${v?v.shape:"—"}</button>
+          <button type="button" data-vi="${i}:1" title="Doigté suivant">▸</button>
+        </div>
         <div class="det-b">
           <button type="button" data-mv="-1" data-i="${i}" title="Reculer">◀</button>
           <button type="button" data-pl="${i}" title="Écouter">▸</button>
           <button type="button" data-rm="${i}" title="Retirer">✕</button>
           <button type="button" data-mv="1" data-i="${i}" title="Avancer">▶</button>
         </div>
+        <div class="det-q"><p>Transformer</p>
+          ${NAV_Q.map(q=>`<button type="button" data-q="${i}:${q}" aria-pressed="${FAM[q]===FAM[a.q]&&QUAL[q].sfx===QUAL[a.q].sfx}">${QUAL[q].sfx||"triade"}</button>`).join("")}</div>
         <div class="det-alt"><p>À la place</p>${alts.map((o,k)=>
           `<button type="button" data-alt="${i}:${k}"><b>${cname(o.pc,o.q)}</b><em>${o.r}</em></button>`).join("")}</div>
         <div hidden data-alts="${i}">${JSON.stringify(alts).replace(/"/g,"&quot;")}</div>
@@ -2142,6 +2086,20 @@ function renderDetail(item){
     const a=mesDraft[+b.dataset.rm];
     confirmer("Retirer "+cname(a.pc,a.q,a.flat)+" ?","Il disparaît de ce chemin ; le reste ne bouge pas.",
       ()=>{mesDraft.splice(+b.dataset.rm,1);saveDraft(item).then(refresh);});});
+  $("#mesList").querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{
+    const [i,q]=b.dataset.q.split(":");
+    const a=mesDraft[+i],vs=voicings(a.pc,q,a.flat);
+    if(!vs.length){hint("Pas de doigté jouable pour cet accord.");return;}
+    a.q=q; a.vi=0; a.frets=vs[0].frets; a.nom=cname(a.pc,q,a.flat);
+    strum(a.frets);
+    saveDraft(item).then(refresh);});
+  $("#mesList").querySelectorAll("[data-vi]").forEach(b=>b.onclick=()=>{
+    const [i,d]=b.dataset.vi.split(":").map(Number);
+    const a=mesDraft[i],vs=voicings(a.pc,a.q,a.flat);
+    a.vi=(((a.vi||0)+d)%vs.length+vs.length)%vs.length;
+    a.frets=vs[a.vi].frets;
+    strum(a.frets);
+    saveDraft(item).then(refresh);});
   $("#mesList").querySelectorAll("[data-alt]").forEach(b=>b.onclick=()=>{
     const [i,k]=b.dataset.alt.split(":").map(Number);
     const alts=JSON.parse($("#mesList").querySelector('[data-alts="'+i+'"]').textContent);
