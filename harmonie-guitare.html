@@ -3,14 +3,50 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
 :root{
+  --ground:#FBF7F1; --panel:#FFFFFF; --panel-2:#F5EFE6; --panel-3:#EDE5D9;
+  --line:#D6C8B6; --line-soft:#E8DFD2;
+  --ink:#1F1811; --ink-mute:#6A5A4B; --ink-dim:#92806C;
+  --T:#B8730A; --SD:#0B7A69; --D:#BC3C17; --C:#6B3FC0;
+  --T-deep:#FBF0DA; --SD-deep:#DFF2EE; --D-deep:#FBE7DF; --C-deep:#EFE8FB;
+  --on-accent:#FFFFFF;
+  --wood:#EFE3D2; --inlay:#DCCCB4; --fret:#B7A48D; --string:#8B7860; --nut:#5A4A38;
+  --note-bg:#DFF2EE; --note-st:#0B7A69; --note-tx:#08574A;
+  --arrow:#A3907B; --arrow-alt:#8A7359; --arrowhead:#8B7860;
+  --diag-line:#C6B6A2; --diag-str:#A08D77;
+  --map-bg1:#FFFDF9; --map-bg2:#F6F0E7;
+  --head-bg:#FFFCF6;
+  --display:"Fraunces",Georgia,"Times New Roman",serif;
+  --ui:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  color-scheme:light dark;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --ground:#13100E; --panel:#1D1815; --panel-2:#241E1A; --panel-3:#2C2420;
   --line:#4A3C34; --line-soft:#332A25;
   --ink:#F7F0E8; --ink-mute:#B4A294; --ink-dim:#8A7869;
   --T:#F2A93B; --SD:#4FC2AE; --D:#F0623A; --C:#B58BF0;
   --T-deep:#3A2A11; --SD-deep:#123430; --D-deep:#3A1A11; --C-deep:#291D3B;
-  --display:"Fraunces",Georgia,"Times New Roman",serif;
-  --ui:"Archivo","Helvetica Neue",Arial,sans-serif;
-  --mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  --on-accent:#1A1207;
+  --wood:#241B16; --inlay:#3A2E27; --fret:#6A574A; --string:#8A7869; --nut:#D8C7B5;
+  --note-bg:#123430; --note-st:#4FC2AE; --note-tx:#8FE6D6;
+  --arrow:#5A4A40; --arrow-alt:#7C6759; --arrowhead:#8A7869;
+  --diag-line:#57473E; --diag-str:#6B594E;
+  --map-bg1:#1E1915; --map-bg2:#13100E;
+  --head-bg:#1B1714;
+}}
+:root[data-theme="dark"]{
+  --ground:#13100E; --panel:#1D1815; --panel-2:#241E1A; --panel-3:#2C2420;
+  --line:#4A3C34; --line-soft:#332A25;
+  --ink:#F7F0E8; --ink-mute:#B4A294; --ink-dim:#8A7869;
+  --T:#F2A93B; --SD:#4FC2AE; --D:#F0623A; --C:#B58BF0;
+  --T-deep:#3A2A11; --SD-deep:#123430; --D-deep:#3A1A11; --C-deep:#291D3B;
+  --on-accent:#1A1207;
+  --wood:#241B16; --inlay:#3A2E27; --fret:#6A574A; --string:#8A7869; --nut:#D8C7B5;
+  --note-bg:#123430; --note-st:#4FC2AE; --note-tx:#8FE6D6;
+  --arrow:#5A4A40; --arrow-alt:#7C6759; --arrowhead:#8A7869;
+  --diag-line:#57473E; --diag-str:#6B594E;
+  --map-bg1:#1E1915; --map-bg2:#13100E;
+  --head-bg:#1B1714;
 }
 *{box-sizing:border-box}
 body{background:var(--ground);color:var(--ink);font-family:var(--ui);font-size:15px;line-height:1.55;margin:0;padding-block:0 56px;-webkit-font-smoothing:antialiased}
@@ -19,7 +55,7 @@ button{font-family:var(--ui)}
 button:focus-visible,[tabindex]:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--T);outline-offset:2px}
 
 /* en-tête */
-.top{border-bottom:1px solid var(--line-soft);background:linear-gradient(180deg,#1B1714 0%,var(--ground) 100%);padding-block:26px 0}
+.top{border-bottom:1px solid var(--line-soft);background:linear-gradient(180deg,var(--head-bg) 0%,var(--ground) 100%);padding-block:26px 0}
 .eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-dim);font-weight:600;margin:0 0 6px}
 h1{font-family:var(--display);font-weight:600;font-size:clamp(28px,5vw,42px);line-height:1.03;margin:0 0 8px;letter-spacing:-.01em;text-wrap:balance}
 h1 em{font-style:italic;color:var(--T)}
@@ -34,7 +70,7 @@ h1 em{font-style:italic;color:var(--T)}
 .roots{display:flex;flex-wrap:wrap;gap:4px}
 .roots button,.modes button{font-size:13px;font-weight:600;background:transparent;color:var(--ink-mute);border:1px solid var(--line);border-radius:3px;padding:6px 9px;cursor:pointer;min-width:36px;transition:background .15s,color .15s,border-color .15s}
 .roots button:hover,.modes button:hover{border-color:var(--T);color:var(--ink)}
-.roots button[aria-pressed="true"],.modes button[aria-pressed="true"]{background:var(--T);border-color:var(--T);color:#1A1207}
+.roots button[aria-pressed="true"],.modes button[aria-pressed="true"]{background:var(--T);border-color:var(--T);color:var(--on-accent)}
 .modes{display:flex;gap:4px}.modes button{min-width:82px}
 .sound{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-mute);border:1px solid var(--line);border-radius:3px;padding:7px 11px;cursor:pointer;background:transparent;font-weight:500}
 .sound[aria-pressed="true"]{color:var(--ink);border-color:var(--SD)}
@@ -47,7 +83,7 @@ h1 em{font-style:italic;color:var(--T)}
 /* carte */
 .board{display:grid;grid-template-columns:minmax(0,1fr) 384px;gap:26px;margin-top:22px;align-items:start}
 @media (max-width:980px){.board{grid-template-columns:minmax(0,1fr)}}
-.map-scroll{overflow-x:auto;overscroll-behavior-x:contain;background:radial-gradient(ellipse at 30% 45%,#1E1915 0%,var(--ground) 72%);border:1px solid var(--line-soft);border-radius:5px}
+.map-scroll{overflow-x:auto;overscroll-behavior-x:contain;background:radial-gradient(ellipse at 30% 45%,var(--map-bg1) 0%,var(--map-bg2) 72%);border:1px solid var(--line-soft);border-radius:5px}
 .map-scroll svg{display:block;width:100%;min-width:660px;height:auto}
 .node{cursor:pointer}
 .node .ring{transition:opacity .18s,stroke-width .18s}
@@ -58,19 +94,19 @@ h1 em{font-style:italic;color:var(--T)}
 .node .deg{font-family:var(--mono);font-size:12.5px;font-weight:600}
 .node.dim{opacity:.62}
 .node.target .ring{stroke-width:3}
-.arrow{fill:none;stroke:#5A4A40;stroke-width:2;opacity:.55;transition:opacity .18s,stroke .18s,stroke-width .18s}
+.arrow{fill:none;stroke:var(--arrow);stroke-width:2;opacity:.55;transition:opacity .18s,stroke .18s,stroke-width .18s}
 .arrow.soft{stroke-dasharray:5 5}
 .arrow.lit{opacity:1;stroke-width:3.4}
-.arrow.faded{opacity:.3;stroke-dasharray:2 7}
+.arrow.faded{opacity:.4;stroke-dasharray:2 7}
 .dyn{fill:none}
 .dyn.rec{stroke-width:3.4;opacity:1}
-.dyn.alt{stroke:#7C6759;stroke-width:1.8;stroke-dasharray:3 6;opacity:.75}
+.dyn.alt{stroke:var(--arrow-alt);stroke-width:2;stroke-dasharray:3 6;opacity:.9}
 .axis-label{font-family:var(--ui);font-size:11px;letter-spacing:.18em;font-weight:700;text-transform:uppercase}
 .map-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px}
 .map-legend div{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-dim)}
 .map-legend i{width:10px;height:10px;border-radius:50%;display:block}
 .map-legend i.line{width:20px;height:3px;border-radius:2px;background:var(--T)}
-.map-legend i.dash{width:20px;height:0;border-radius:0;background:none;border-top:2px dashed #7C6759}
+.map-legend i.dash{width:20px;height:0;border-radius:0;background:none;border-top:2px dashed var(--arrow-alt)}
 
 /* emprunts */
 .explain{background:var(--panel);border:1px solid var(--line-soft);border-left:3px solid var(--C);border-radius:0 4px 4px 0;padding:14px 16px;margin:0 0 12px}
@@ -98,7 +134,7 @@ h1 em{font-style:italic;color:var(--T)}
 .panel-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
 .btn{font-size:13px;font-weight:600;cursor:pointer;border-radius:3px;padding:8px 13px;border:1px solid var(--line);background:transparent;color:var(--ink)}
 .btn:hover{border-color:var(--T)}
-.btn.primary{background:var(--T);border-color:var(--T);color:#1A1207}
+.btn.primary{background:var(--T);border-color:var(--T);color:var(--on-accent)}
 .btn.primary:hover{filter:brightness(1.08)}
 .btn.small{font-size:12px;padding:5px 10px}
 .btn:disabled{opacity:.45;cursor:not-allowed}
@@ -120,7 +156,7 @@ h1 em{font-style:italic;color:var(--T)}
 #fretboard svg.playing .fbnote{opacity:.14}
 #fretboard svg.playing .fbnote.done{opacity:.5}
 #fretboard svg.playing .fbnote.lit{opacity:1}
-#fretboard svg.playing .fbnote.lit circle{stroke:#F7F0E8;stroke-width:3}
+#fretboard svg.playing .fbnote.lit circle{stroke:var(--ink);stroke-width:3}
 .map-note{font-size:12.5px;color:var(--ink-mute);margin:10px 0 0;max-width:70ch}
 .map-note strong{color:var(--ink)}
 .tab{font-family:var(--mono);font-size:11px;line-height:1.35;color:var(--ink-mute);white-space:pre;margin:0}
@@ -157,23 +193,26 @@ select,input[type=text]{background:var(--panel-2);border:1px solid var(--line);c
 
 /* travail */
 .work-controls{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;margin-bottom:18px}
-.fb-scroll{overflow-x:auto;border:1px solid var(--line-soft);border-radius:5px;background:linear-gradient(180deg,#221B16,#1A1512)}
+.fb-scroll{overflow-x:auto;border:1px solid var(--line-soft);border-radius:5px;background:var(--map-bg2)}
 .fb-scroll svg{display:block;width:100%;min-width:900px;height:auto}
 .work-grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:24px;align-items:start;margin-top:20px}
 @media (max-width:980px){.work-grid{grid-template-columns:minmax(0,1fr)}}
 .card{background:var(--panel);border:1px solid var(--line-soft);border-radius:5px;padding:18px}
 .card h3{font-family:var(--display);font-size:20px;font-weight:600;margin:0 0 8px}
 .card p{font-size:13.5px;color:var(--ink-mute);margin:0 0 10px;max-width:62ch}
-.card code{font-family:var(--mono);font-size:12.5px;color:var(--T);background:#241C13;padding:1px 5px;border-radius:2px}
+.card code{font-family:var(--mono);font-size:12.5px;color:var(--T);background:var(--T-deep);padding:1px 5px;border-radius:2px}
 .boxes{display:flex;flex-wrap:wrap;gap:4px}
 .boxes button{font-size:12.5px;font-weight:600;background:transparent;border:1px solid var(--line);color:var(--ink-mute);border-radius:3px;padding:6px 11px;cursor:pointer}
-.boxes button[aria-pressed="true"]{background:var(--SD);border-color:var(--SD);color:#0C2621}
+.boxes button[aria-pressed="true"]{background:var(--SD);border-color:var(--SD);color:var(--on-accent)}
 .drill{border-top:1px solid var(--line-soft);padding-top:12px;margin-top:12px}
 .drill h4{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim);margin:0 0 8px;font-weight:700}
 .drill ol{margin:0;padding-left:18px;font-size:13.5px;color:var(--ink-mute)}
 .drill li{margin-bottom:7px}
 .drill li b{color:var(--ink);font-weight:600}
 
+.tabs{overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{white-space:nowrap}
 /* réseau */
 .nav-head{display:grid;grid-template-columns:320px minmax(0,1fr);gap:22px;align-items:start}
 @media (max-width:840px){.nav-head{grid-template-columns:minmax(0,1fr)}}
@@ -183,7 +222,7 @@ select,input[type=text]{background:var(--panel-2);border:1px solid var(--line);c
 .nav-center svg{max-width:150px;margin:0 auto;display:block}
 .nav-q{display:flex;flex-wrap:wrap;gap:4px;margin:12px 0 0}
 .nav-q button{font-size:12px;font-weight:600;background:transparent;border:1px solid var(--line);color:var(--ink-mute);border-radius:3px;padding:5px 9px;cursor:pointer}
-.nav-q button[aria-pressed="true"]{background:var(--T);border-color:var(--T);color:#1A1207}
+.nav-q button[aria-pressed="true"]{background:var(--T);border-color:var(--T);color:var(--on-accent)}
 .nav-side{background:var(--panel);border:1px solid var(--line-soft);border-radius:5px;padding:18px}
 .path-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:44px}
 .path-step{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:4px;padding:6px 10px;background:var(--panel-2);font-weight:700;font-size:15px}
@@ -207,6 +246,27 @@ select,input[type=text]{background:var(--panel-2);border:1px solid var(--line);c
 .prop-play{background:transparent;border:1px solid var(--line);color:var(--ink-dim);border-radius:2px;font-size:11px;padding:3px 7px;cursor:pointer;align-self:center}
 .prop-play:hover{color:var(--ink);border-color:var(--SD)}
 
+/* dictionnaire + chemins */
+.dict-block{background:var(--panel);border:1px solid var(--line-soft);border-radius:5px;padding:16px;margin-bottom:16px}
+.dict-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;margin-bottom:4px}
+.dict-head h3{font-family:var(--display);font-size:26px;font-weight:600;margin:0}
+.dict-head span{font-size:12.5px;color:var(--ink-mute)}
+.dict-head code{font-family:var(--mono);font-size:12px;color:var(--ink-dim)}
+.dict-v{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:12px;margin-top:12px}
+#pathNow{margin-top:14px;border-top:1px solid var(--line-soft);padding-top:14px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.now-lab{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-dim);font-weight:600;margin:0 0 2px}
+.now-chord{font-family:var(--display);font-size:52px;font-weight:600;line-height:1;margin:0;color:var(--T)}
+.now-next{font-family:var(--display);font-size:26px;font-weight:600;line-height:1;margin:0;color:var(--ink-mute)}
+#pathNow svg{max-width:124px}
+.now-beat{display:flex;gap:5px;margin-top:8px}
+.now-beat i{width:9px;height:9px;border-radius:50%;background:var(--line);display:block}
+.now-beat i.on{background:var(--T)}
+.mes-item{background:var(--panel);border:1px solid var(--line-soft);border-radius:5px;padding:14px 16px;margin-bottom:10px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.mes-item input[type=text]{font-weight:600;min-width:180px;flex:1}
+.mes-sum{font-family:var(--mono);font-size:12px;color:var(--ink-mute);flex:2;min-width:200px}
+.mes-kind{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:3px 8px;border-radius:2px;background:var(--panel-3);color:var(--ink-mute)}
+.mes-kind.chemin{background:var(--C-deep);color:var(--C)}
+.mes-kind.grille{background:var(--T-deep);color:var(--T)}
 /* notes */
 .notes{margin-top:44px;border-top:1px solid var(--line-soft);padding-top:30px}
 .notes h2{font-family:var(--display);font-weight:600;font-size:26px;margin:0 0 6px;letter-spacing:-.01em}
@@ -215,7 +275,7 @@ select,input[type=text]{background:var(--panel-2);border:1px solid var(--line);c
 .note h3{font-size:13px;font-weight:700;margin:0 0 7px;display:flex;gap:9px;align-items:baseline}
 .note h3 span{font-family:var(--mono);font-size:11px;color:var(--ink-dim);font-weight:400}
 .note p{margin:0 0 9px;font-size:14px;color:var(--ink-mute);max-width:60ch}
-.note code{font-family:var(--mono);font-size:12.5px;color:var(--T);background:#241C13;padding:1px 5px;border-radius:2px}
+.note code{font-family:var(--mono);font-size:12.5px;color:var(--T);background:var(--T-deep);padding:1px 5px;border-radius:2px}
 footer{margin-top:40px;color:var(--ink-dim);font-size:12.5px}
 [hidden]{display:none!important}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -234,6 +294,15 @@ footer{margin-top:40px;color:var(--ink-dim);font-size:12.5px}
       </div></label>
       <button type="button" class="sound" id="sound" aria-pressed="false"><span class="dot"></span>Son</button>
       <button type="button" class="btn" id="silence" title="Échap">■ Couper</button>
+      <label class="field"><span>Tempo</span>
+        <div class="tempo">
+          <input type="range" id="bpm" min="40" max="200" step="2" value="92">
+          <output id="bpmOut">92 bpm</output>
+          <button type="button" class="sound" id="metro" aria-pressed="false"><span class="dot"></span>Métronome</button>
+        </div>
+      </label>
+      <label class="field"><span>Créateur</span><select id="createur"></select></label>
+      <button type="button" class="btn" id="theme" title="Jour / nuit">☀︎ Jour</button>
       <label class="field"><span>Timbre</span>
         <select id="tone"><option value="nylon">Classique (nylon)</option><option value="steel">Folk (acier)</option><option value="bass">Basse</option><option value="piano">Piano</option><option value="violin">Violon</option><option value="trumpet">Trompette</option></select>
       </label>
@@ -242,6 +311,8 @@ footer{margin-top:40px;color:var(--ink-dim);font-size:12.5px}
       <button type="button" role="tab" id="tab-harmonie" aria-selected="true" aria-controls="view-harmonie">Carte des harmonies</button>
       <button type="button" role="tab" id="tab-travail" aria-selected="false" aria-controls="view-travail">Travail des gammes</button>
       <button type="button" role="tab" id="tab-reseau" aria-selected="false" aria-controls="view-reseau">Réseau des accords</button>
+      <button type="button" role="tab" id="tab-accords" aria-selected="false" aria-controls="view-accords">Dictionnaire d'accords</button>
+      <button type="button" role="tab" id="tab-mes" aria-selected="false" aria-controls="view-mes">Mes chemins</button>
     </div>
   </div>
 </header>
@@ -274,11 +345,6 @@ footer{margin-top:40px;color:var(--ink-dim);font-size:12.5px}
         <div class="prog-actions">
           <button type="button" class="btn primary" id="playProg">▶ Jouer en boucle</button>
           <button type="button" class="btn" id="clearProg">Vider</button>
-          <div class="tempo">
-            <label class="lbl" for="bpm">Tempo</label>
-            <input type="range" id="bpm" min="50" max="180" step="2" value="92">
-            <output id="bpmOut">92 bpm</output>
-          </div>
           <div class="tempo">
             <label class="lbl" for="beats">Durée</label>
             <select id="beats"><option value="2">2 temps</option><option value="4" selected>4 temps</option><option value="8">8 temps</option></select>
@@ -398,9 +464,14 @@ footer{margin-top:40px;color:var(--ink-dim);font-size:12.5px}
       <div class="path-row" id="pathRow"></div>
       <div class="prog-actions" style="margin-top:10px">
         <button type="button" class="btn primary" id="playPath">▶ Jouer le chemin</button>
-        <button type="button" class="btn" id="toLoop">Envoyer vers la boucle</button>
-        <button type="button" class="btn" id="clearPath">Repartir de zéro</button>
+        <label class="lbl" for="pathBeats">Durée</label>
+        <select id="pathBeats"><option value="2">2 temps</option><option value="4" selected>4 temps</option><option value="8">8 temps</option></select>
+        <button type="button" class="sound" id="pathLoop" aria-pressed="true"><span class="dot"></span>Boucler</button>
+        <button type="button" class="btn" id="toLoop">Vers la boucle</button>
+        <button type="button" class="btn" id="savePath">Enregistrer</button>
+        <button type="button" class="btn" id="clearPath">Zéro</button>
       </div>
+      <div id="pathNow" hidden></div>
     </div>
   </div>
 
@@ -411,6 +482,27 @@ footer{margin-top:40px;color:var(--ink-dim);font-size:12.5px}
     <p>Un même accord appartient à plusieurs tonalités à la fois. C'est exactement par là qu'on module : tu joues l'accord, et l'oreille accepte de le relire dans une autre tonalité. Clique une tonalité pour ouvrir sa carte des harmonies.</p>
     <div class="colors" id="navKeys"></div>
   </div>
+</section>
+
+<section id="view-accords" role="tabpanel" aria-labelledby="tab-accords" hidden>
+  <div class="work-controls">
+    <label class="field"><span>Accord</span><div class="roots" id="dictRoots"></div></label>
+    <label class="field"><span>Famille</span>
+      <select id="dictFam">
+        <option value="tri">Triades</option>
+        <option value="sept">Septièmes &amp; sixtes</option>
+        <option value="neuf">Neuvièmes et au-delà</option>
+        <option value="all">Tout</option>
+      </select>
+    </label>
+  </div>
+  <div id="dict"></div>
+</section>
+
+<section id="view-mes" role="tabpanel" aria-labelledby="tab-mes" hidden>
+  <p class="map-note" style="margin:0 0 18px">Tout ce que tu enregistres — un chemin construit dans le réseau, une grille montée dans la boucle — atterrit ici. Renomme, recharge, rejoue.</p>
+  <p class="hint" id="mesHint" style="margin-bottom:14px">—</p>
+  <div id="mesList"></div>
 </section>
 
 </main>
@@ -453,6 +545,21 @@ const QUAL={
   "7s4":{sfx:"7sus4",iv:[0,5,7,10],    lab:"septième suspendue"}
 };
 const cname=(pc,q,flat)=>spell(pc,flat)+QUAL[q].sfx;
+
+/* ===================== palette (suit le thème) ===================== */
+let PAL={};
+function readPalette(){
+  const cs=getComputedStyle(document.documentElement);
+  const g=n=>(cs.getPropertyValue(n)||"").trim()||"#888";
+  PAL={ink:g("--ink"),mute:g("--ink-mute"),dim:g("--ink-dim"),onAcc:g("--on-accent"),
+       T:g("--T"),SD:g("--SD"),D:g("--D"),C:g("--C"),
+       Td:g("--T-deep"),SDd:g("--SD-deep"),Dd:g("--D-deep"),Cd:g("--C-deep"),
+       wood:g("--wood"),inlay:g("--inlay"),fret:g("--fret"),string:g("--string"),nut:g("--nut"),
+       noteBg:g("--note-bg"),noteSt:g("--note-st"),noteTx:g("--note-tx"),
+       arrowhead:g("--arrowhead"),diagLine:g("--diag-line"),diagStr:g("--diag-str")};
+  FN_COL.T=PAL.T; FN_COL.SD=PAL.SD; FN_COL.D=PAL.D; FN_COL.C=PAL.C;
+  FN_DEEP.T=PAL.Td; FN_DEEP.SD=PAL.SDd; FN_DEEP.D=PAL.Dd; FN_DEEP.C=PAL.Cd;
+}
 
 /* ===================== manche ===================== */
 const OPEN_PC=[4,9,2,7,11,4], OPEN_MIDI=[40,45,50,55,59,64], STR_LAB=["E","A","D","G","B","e"];
@@ -553,25 +660,25 @@ function diagram(v){
     if(mx>5){base=mn; if(mx-base>4) base=mx-4;}}
   const x=i=>left+i*colW, fy=n=>top+(n-0.5)*rowH;
   let s=`<svg viewBox="-14 0 ${W+14} ${H}" role="img" aria-label="Diagramme ${v.name}">`;
-  for(let i=0;i<6;i++) s+=`<line x1="${x(i)}" y1="${top}" x2="${x(i)}" y2="${top+rows*rowH}" stroke="#6B594E" stroke-width="1"/>`;
-  for(let r=0;r<=rows;r++) s+=`<line x1="${left}" y1="${top+r*rowH}" x2="${right}" y2="${top+r*rowH}" stroke="#57473E" stroke-width="1"/>`;
-  if(base===1) s+=`<rect x="${left-1}" y="${top-5}" width="${right-left+2}" height="5" fill="#D8C7B5" rx="1"/>`;
-  else s+=`<text x="${left-12}" y="${fy(1)+4}" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#B4A294">${base}</text>`;
+  for(let i=0;i<6;i++) s+=`<line x1="${x(i)}" y1="${top}" x2="${x(i)}" y2="${top+rows*rowH}" stroke="${PAL.diagStr}" stroke-width="1"/>`;
+  for(let r=0;r<=rows;r++) s+=`<line x1="${left}" y1="${top+r*rowH}" x2="${right}" y2="${top+r*rowH}" stroke="${PAL.diagLine}" stroke-width="1"/>`;
+  if(base===1) s+=`<rect x="${left-1}" y="${top-5}" width="${right-left+2}" height="5" fill="${PAL.nut}" rx="1"/>`;
+  else s+=`<text x="${left-12}" y="${fy(1)+4}" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="${PAL.mute}">${base}</text>`;
   v.frets.forEach((f,i)=>{
-    if(f===null) s+=`<text x="${x(i)}" y="${top-9}" text-anchor="middle" font-size="12" fill="#8A7869" font-family="Archivo, sans-serif">×</text>`;
-    else if(f===0) s+=`<circle cx="${x(i)}" cy="${top-13}" r="4.2" fill="none" stroke="#D8C7B5" stroke-width="1.3"/>`;
+    if(f===null) s+=`<text x="${x(i)}" y="${top-9}" text-anchor="middle" font-size="12" fill="${PAL.dim}" font-family="Archivo, sans-serif">×</text>`;
+    else if(f===0) s+=`<circle cx="${x(i)}" cy="${top-13}" r="4.2" fill="none" stroke="${PAL.nut}" stroke-width="1.3"/>`;
   });
   if(v.barre){
     const idx=v.frets.map((f,i)=>f===v.barreFret?i:-1).filter(i=>i>=0);
     if(idx.length>1){const a=Math.min.apply(null,idx),b=Math.max.apply(null,idx),y=fy(v.barreFret-base+1);
-      s+=`<rect x="${x(a)-8}" y="${y-8}" width="${x(b)-x(a)+16}" height="16" rx="8" fill="#F2A93B"/>`;}
+      s+=`<rect x="${x(a)-8}" y="${y-8}" width="${x(b)-x(a)+16}" height="16" rx="8" fill="${PAL.T}"/>`;}
   }
   v.frets.forEach((f,i)=>{
     if(f===null||f===0) return;
     const pos=f-base+1; if(pos<1||pos>rows) return;
-    if(!(v.barre&&f===v.barreFret)) s+=`<circle cx="${x(i)}" cy="${fy(pos)}" r="8" fill="#F2A93B"/>`;
+    if(!(v.barre&&f===v.barreFret)) s+=`<circle cx="${x(i)}" cy="${fy(pos)}" r="8" fill="${PAL.T}"/>`;
     const fg=v.fingers&&v.fingers[i];
-    if(fg) s+=`<text x="${x(i)}" y="${fy(pos)+3.8}" text-anchor="middle" font-size="10" font-weight="700" fill="#1A1207" font-family="Archivo, sans-serif">${fg}</text>`;
+    if(fg) s+=`<text x="${x(i)}" y="${fy(pos)+3.8}" text-anchor="middle" font-size="10" font-weight="700" fill="${PAL.onAcc}" font-family="Archivo, sans-serif">${fg}</text>`;
   });
   return s+"</svg>";
 }
@@ -766,6 +873,7 @@ function silence(){
   if(typeof stopLoop==="function") stopLoop();
   if(typeof stopScale==="function") stopScale();
   if(typeof stopPath==="function") stopPath();
+  if(typeof stopMetro==="function") stopMetro();
   if(!AC) return;
   const now=AC.currentTime;
   ringing.forEach(v=>{
@@ -916,6 +1024,53 @@ ROOTS.forEach(r=>{const b=document.createElement("button");b.type="button";b.tex
   b.onclick=()=>{tonic=r.pc;render();};rootsEl.appendChild(b);});
 $("#modes").onclick=e=>{const b=e.target.closest("button"); if(!b) return; mode=b.dataset.mode; render();};
 $("#sound").onclick=e=>{soundOn=!soundOn;e.currentTarget.setAttribute("aria-pressed",String(soundOn));if(soundOn)ensureAC();};
+/* --- métronome, calé sur le tempo de la barre du haut --- */
+let metroOn=false,metroTimer=null,metroNext=0,metroBeat=0;
+function tick(t,accent){
+  const o=AC.createOscillator(),g=AC.createGain();
+  o.type="square"; o.frequency.value=accent?2100:1400;
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.exponentialRampToValueAtTime(accent?0.22:0.13,t+0.002);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+0.055);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t+0.07);
+}
+function stopMetro(){
+  metroOn=false; if(metroTimer){clearInterval(metroTimer);metroTimer=null;}
+  $("#metro").setAttribute("aria-pressed","false");
+}
+function startMetro(){
+  if(!soundOn){soundOn=true;$("#sound").setAttribute("aria-pressed","true");}
+  ensureAC(); metroOn=true; metroBeat=0; metroNext=AC.currentTime+0.12;
+  $("#metro").setAttribute("aria-pressed","true");
+  metroTimer=setInterval(()=>{
+    while(metroOn&&metroNext<AC.currentTime+0.25){
+      tick(metroNext,metroBeat%4===0); metroNext+=60/bpm; metroBeat++;
+    }
+  },25);
+}
+$("#metro").onclick=()=>{metroOn?stopMetro():startMetro();};
+
+/* --- jour / nuit --- */
+function currentTheme(){
+  const st=document.documentElement.getAttribute("data-theme");
+  if(st) return st;
+  return window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";
+}
+function applyTheme(t,rerender){
+  document.documentElement.setAttribute("data-theme",t);
+  $("#theme").textContent = t==="dark" ? "☀︎ Jour" : "☾ Nuit";
+  try{localStorage.setItem("harmonie-theme",t);}catch(e){}
+  readPalette();
+  if(rerender){
+    renderMap(); renderColors();
+    if(current) renderPanel(current,true);
+    renderFretboard();
+    if(!$("#view-reseau").hidden){renderNav();renderPath();}
+    if(!$("#view-accords").hidden) renderChords();
+  }
+}
+$("#theme").onclick=()=>applyTheme(currentTheme()==="dark"?"light":"dark",true);
+
 $("#silence").onclick=silence;
 document.addEventListener("keydown",e=>{
   if(e.key==="Escape"){silence();}
@@ -930,13 +1085,17 @@ $("#tone").onchange=e=>{
 $("#tab-harmonie").onclick=()=>switchTab("harmonie");
 $("#tab-travail").onclick=()=>switchTab("travail");
 $("#tab-reseau").onclick=()=>switchTab("reseau");
+$("#tab-accords").onclick=()=>switchTab("accords");
+$("#tab-mes").onclick=()=>switchTab("mes");
 function switchTab(name){
-  ["harmonie","travail","reseau"].forEach(n=>{
+  ["harmonie","travail","reseau","accords","mes"].forEach(n=>{
     $("#tab-"+n).setAttribute("aria-selected",String(n===name));
     $("#view-"+n).hidden = n!==name;
   });
   if(name==="travail") renderFretboard(); else stopScale();
   if(name==="reseau"){renderNav();renderPath();} else stopPath();
+  if(name==="accords") renderChords();
+  if(name==="mes") renderMes();
 }
 
 /* ===================== carte ===================== */
@@ -955,9 +1114,9 @@ function renderMap(){
      <path d="M0 0 L10 5 L0 10 z" fill="context-stroke"/></marker>
    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
      <feGaussianBlur stdDeviation="9" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
-   <text x="150" y="400" text-anchor="middle" class="axis-label" fill="#F2A93B" opacity=".75">Repos</text>
-   <text x="428" y="400" text-anchor="middle" class="axis-label" fill="#4FC2AE" opacity=".75">Départ</text>
-   <text x="706" y="400" text-anchor="middle" class="axis-label" fill="#F0623A" opacity=".75">Tension</text>`;
+   <text x="150" y="400" text-anchor="middle" class="axis-label" fill="${PAL.T}" opacity=".8">Repos</text>
+   <text x="428" y="400" text-anchor="middle" class="axis-label" fill="${PAL.SD}" opacity=".8">Départ</text>
+   <text x="706" y="400" text-anchor="middle" class="axis-label" fill="${PAL.D}" opacity=".8">Tension</text>`;
   flow.forEach(f=>{const d=arrowPath(f[0],f[1],f[2]); if(d)
     s+=`<path class="arrow ${f[3]||""}" stroke="#5A4A40" data-from="${f[0]}" data-to="${f[1]}" d="${d}" marker-end="url(#ah)"/>`;});
   degrees.forEach(g=>{
@@ -966,7 +1125,7 @@ function renderMap(){
       <circle class="halo" cx="${p.x}" cy="${p.y}" r="${p.r}" fill="${col}" opacity=".2" filter="url(#glow)"/>
       <circle class="bg" cx="${p.x}" cy="${p.y}" r="${p.r}" fill="${deep}"/>
       <circle class="ring" cx="${p.x}" cy="${p.y}" r="${p.r}" fill="none" stroke="${col}" stroke-width="${g.slot==="tm"?3:2}"/>
-      <text class="name" x="${p.x}" y="${p.y+2}" text-anchor="middle" font-size="${g.slot==="tm"?27:23}" fill="#F7F0E8">${nm}</text>
+      <text class="name" x="${p.x}" y="${p.y+2}" text-anchor="middle" font-size="${g.slot==="tm"?27:23}" fill="${PAL.ink}">${nm}</text>
       <text class="deg" x="${p.x}" y="${p.y+(g.slot==="tm"?24:21)}" text-anchor="middle" fill="${col}">${g.d}</text>
     </g>`;
   });
@@ -1063,7 +1222,7 @@ function renderPanel(ch,keepSel){
     <div class="panel-head">
       <div><h2 class="chord-name">${nm}</h2>
       <p class="chord-meta">${ch.tag||("degré "+ch.d)} · ${QUAL[ch.q].lab} · ${QUAL[ch.q].iv.map(i=>spell(ch.pc+i,ch.flat)).join(" ")}</p></div>
-      <span class="fn-badge" style="background:${col};color:#16110D">${FN_LAB[ch.fn]}</span>
+      <span class="fn-badge" style="background:${col};color:${PAL.onAcc}">${FN_LAB[ch.fn]}</span>
     </div>
     <p class="role">${ch.role||""}</p>
     ${nextBtns?`<div class="next"><p class="section-label" style="margin-bottom:7px">Tu peux aller vers</p>
@@ -1209,12 +1368,19 @@ function renderPresets(){
   });
 }
 
-/* ---- enregistrement des grilles : base Airtable « Guitare — Harmonie » ---- */
+/* ---- mémoire : base Airtable « Guitare — Harmonie », table Grilles ----
+   Les appels passent par le connecteur Airtable du lecteur : aucune clé
+   d'API ne circule dans cette page. Formats vérifiés sur la vraie base —
+   les enregistrements reviennent dans cellValuesByFieldId, et un champ
+   « choix unique » est un objet en lecture, une chaîne en écriture.     */
 const AIR={base:"appnzisvARTfJG5di",table:"tbl23cy3ggY7kLm3s",
   F:{nom:"fldzzmFKhw34Vxgf9",resume:"fldyGMCDmOZcAL6tY",tonique:"fldIFK6OLzTDKxwBy",
-     mode:"fldPXqsKnYfyIOPvU",tempo:"fldqzbmaYNATiG3Ek",accords:"fld6tGANI4kwrhene",cree:"fldrQ7MTEkN2YFJph"}};
+     mode:"fldPXqsKnYfyIOPvU",tempo:"fldqzbmaYNATiG3Ek",accords:"fld6tGANI4kwrhene",
+     notes:"fldJ62kd9jV7Do9XN",cree:"fldrQ7MTEkN2YFJph",
+     type:"fldzvnALAQlpNnrdl",createur:"fldw8cBgQkQIYmafW",favori:"fldKEEcrVrrPFFN88"}};
+const CREATEURS=["Gérald","Axel","Jean-Louis Durand"];
 const LS_KEY="harmonie-grilles";
-let MCP=null,airOK=false;
+let MCP=null,airOK=false,createur=CREATEURS[0];
 const ERRS={
  needs_reauth:"Connexion Airtable expirée. Reconnecte Airtable dans claude.ai › Réglages › Connecteurs.",
  server_not_connected:"Airtable n'est pas connecté sur ce compte. Ajoute-le dans claude.ai › Réglages › Connecteurs.",
@@ -1223,16 +1389,19 @@ const ERRS={
  blocked_by_policy:"Airtable est bloqué par une règle de ton organisation.",
  approval_required:"Airtable demande une approbation qui n'a pas encore été donnée."
 };
-const hint=t=>{$("#saveHint").textContent=t;};
+function hint(t){ const h=$("#saveHint"); if(h) h.textContent=t; const m=$("#mesHint"); if(m) m.textContent=t; }
 function airMsg(e){
   if(!e) return null;
   if(ERRS[e.code]) return ERRS[e.code];
   if(e.code==="tool_error") return "Airtable a refusé l'opération : "+(e.message||"");
   return null;
 }
+function airDown(e){
+  hint((airMsg(e)||"Airtable injoignable pour l'instant.")+" Les enregistrements restent dans ce navigateur.");
+  airOK=false;
+}
 function localGrids(){ try{return JSON.parse(localStorage.getItem(LS_KEY)||"[]");}catch(e){return [];} }
 function localSet(l){ try{localStorage.setItem(LS_KEY,JSON.stringify(l));}catch(e){} }
-function localAdd(g){ localSet(localGrids().concat([g])); }
 
 async function airCall(tool,input,isRetry){
   try{
@@ -1246,6 +1415,15 @@ async function airCall(tool,input,isRetry){
     throw e;
   }
 }
+const cellName=v=>(v&&typeof v==="object")?v.name:v;      // choix unique : objet en lecture
+function fromRecord(r){
+  const f=r.cellValuesByFieldId||r.fields||{};
+  let acc=[]; try{acc=JSON.parse(f[AIR.F.accords]||"[]");}catch(e){acc=[];}
+  return {id:r.id,nom:f[AIR.F.nom]||"sans nom",resume:f[AIR.F.resume]||"",
+          tonique:f[AIR.F.tonique]||"",mode:cellName(f[AIR.F.mode])==="mineur"?"min":"maj",
+          kind:cellName(f[AIR.F.type])||"grille",createur:cellName(f[AIR.F.createur])||"",
+          favori:!!f[AIR.F.favori],accords:acc};
+}
 function recordsOf(p){
   if(!p) return [];
   if(Array.isArray(p)) return p;
@@ -1253,65 +1431,83 @@ function recordsOf(p){
   if(p.data&&Array.isArray(p.data.records)) return p.data.records;
   return [];
 }
-function fromRecord(r){
-  const f=r.fields||{},m=f[AIR.F.mode],mn=(m&&m.name)?m.name:m;
-  let acc=[]; try{acc=JSON.parse(f[AIR.F.accords]||"[]");}catch(e){acc=[];}
-  return {id:r.id,nom:f[AIR.F.nom]||"sans nom",tonique:f[AIR.F.tonique]||"",
-          mode:mn==="mineur"?"min":"maj",accords:acc};
-}
-function airDown(e){ const m=airMsg(e); hint((m||"Airtable injoignable pour l'instant.")+" Les grilles restent enregistrées dans ce navigateur."); airOK=false; }
-
 async function listGrids(){
   if(airOK&&MCP){
     try{
-      const p=await airCall("list_records_for_table",{baseId:AIR.base,tableId:AIR.table,pageSize:50,
+      const p=await airCall("list_records_for_table",{baseId:AIR.base,tableId:AIR.table,pageSize:60,
+        fieldIds:[AIR.F.nom,AIR.F.resume,AIR.F.tonique,AIR.F.mode,AIR.F.type,AIR.F.createur,AIR.F.favori,AIR.F.accords,AIR.F.cree],
         sort:[{fieldId:AIR.F.cree,direction:"desc"}]});
-      return recordsOf(p).map(r=>{try{return fromRecord(r);}catch(e){return null;}}).filter(Boolean);
+      const list=recordsOf(p).map(r=>{try{return fromRecord(r);}catch(e){return null;}}).filter(Boolean);
+      list.sort((a,b)=>(b.favori?1:0)-(a.favori?1:0));      // les favoris d'abord
+      return list;
     }catch(e){ airDown(e); }
   }
-  return localGrids();
+  const l=localGrids().slice().reverse();
+  l.sort((a,b)=>(b.favori?1:0)-(a.favori?1:0));
+  return l;
 }
-async function saveGrid(){
-  if(!prog.length) return;
-  const name=($("#saveName").value||"").trim()||(spell(tonic)+(mode==="maj"?" majeur":" mineur"));
-  const resume=prog.map(p=>cname(p.pc,p.q,p.flat)).join(" – ");
-  const accords=prog.map(p=>({tag:p.tag,pc:p.pc,q:p.q,flat:!!p.flat,
-    nom:cname(p.pc,p.q,p.flat),frets:p.frets.map(f=>f===null?-1:f)}));
-  const local={id:"l"+Date.now(),nom:name,tonique:spell(tonic),mode,accords};
+function packItems(items){
+  return items.map(a=>({tag:a.tag,pc:a.pc,q:a.q,flat:!!a.flat,
+    nom:a.label||cname(a.pc,a.q,a.flat),frets:(a.frets||[]).map(f=>f===null?-1:f)}));
+}
+async function saveItem(kind,name,items){
+  if(!items.length) return;
+  const accords=packItems(items),resume=accords.map(a=>a.nom).join(" – ");
+  const local={id:"l"+Date.now(),nom:name,resume,tonique:spell(tonic),mode,kind,
+               createur,favori:false,accords};
   if(airOK&&MCP){
-    const fields={};
-    fields[AIR.F.nom]=name; fields[AIR.F.resume]=resume; fields[AIR.F.tonique]=spell(tonic);
-    fields[AIR.F.mode]=mode==="maj"?"majeur":"mineur"; fields[AIR.F.tempo]=bpm;
-    fields[AIR.F.accords]=JSON.stringify(accords); fields[AIR.F.cree]=new Date().toISOString();
+    const f={};
+    f[AIR.F.nom]=name; f[AIR.F.resume]=resume; f[AIR.F.tonique]=spell(tonic);
+    f[AIR.F.mode]=mode==="maj"?"majeur":"mineur"; f[AIR.F.type]=kind;
+    f[AIR.F.createur]=createur; f[AIR.F.favori]=false; f[AIR.F.tempo]=bpm;
+    f[AIR.F.accords]=JSON.stringify(accords); f[AIR.F.cree]=new Date().toISOString();
     try{
-      await airCall("create_records_for_table",{baseId:AIR.base,tableId:AIR.table,records:[{fields}]});
-      hint("« "+name+" » enregistrée dans Airtable.");
-    }catch(e){ airDown(e); localAdd(local); }
-  }else localAdd(local);
-  $("#saveName").value=""; renderSaved();
+      await airCall("create_records_for_table",{baseId:AIR.base,tableId:AIR.table,records:[{fields:f}]});
+      hint("« "+name+" » enregistré dans Airtable ("+createur+").");
+    }catch(e){ airDown(e); localSet(localGrids().concat([local])); }
+  }else localSet(localGrids().concat([local]));
+}
+async function patchGrid(g,fields,localPatch){
+  if(String(g.id).charAt(0)==="l"||!airOK||!MCP){
+    const l=localGrids().map(x=>x.id===g.id?Object.assign({},x,localPatch):x);
+    localSet(l); return;
+  }
+  try{ await airCall("update_records_for_table",{baseId:AIR.base,tableId:AIR.table,
+    records:[{id:g.id,fields:fields}]}); }
+  catch(e){ airDown(e); }
+}
+function renameGrid(g,name){
+  if(!name||name===g.nom) return Promise.resolve();
+  const f={}; f[AIR.F.nom]=name;
+  return patchGrid(g,f,{nom:name}).then(()=>hint("Renommé : « "+name+" »."));
+}
+function favGrid(g){
+  const f={}; f[AIR.F.favori]=!g.favori;
+  return patchGrid(g,f,{favori:!g.favori});
 }
 async function deleteGrid(g){
-  if(String(g.id).charAt(0)==="l"||!airOK||!MCP){ localSet(localGrids().filter(x=>x.id!==g.id)); }
+  if(String(g.id).charAt(0)==="l"||!airOK||!MCP) localSet(localGrids().filter(x=>x.id!==g.id));
   else{
     try{ await airCall("delete_records_for_table",{baseId:AIR.base,tableId:AIR.table,recordIds:[g.id]}); }
     catch(e){ airDown(e); }
   }
-  renderSaved();
 }
-function loadGrid(g){
-  prog=(g.accords||[]).map(a=>({pc:a.pc,q:a.q,flat:a.flat,tag:a.tag,
-    frets:(a.frets||[]).map(f=>f===-1?null:f),label:a.nom||cname(a.pc,a.q,a.flat)}));
-  renderProg();
+function saveGrid(){
+  const name=($("#saveName").value||"").trim()||("Grille en "+spell(tonic)+(mode==="maj"?" majeur":" mineur"));
+  return saveItem("grille",name,prog).then(()=>{$("#saveName").value="";renderSaved();});
 }
 async function renderSaved(){
-  const list=await listGrids();
+  const list=(await listGrids()).filter(g=>g.kind!=="chemin").slice(0,12);
   $("#savedList").innerHTML=list.length?list.map((g,i)=>
-    `<span class="saved-item"><b data-load="${i}" style="cursor:pointer" title="Charger">${g.nom}</b>
-      <span>${g.tonique} ${g.mode==="min"?"min":"maj"} · ${(g.accords||[]).length} accords</span>
-      <button type="button" data-del="${i}" aria-label="Supprimer">✕</button></span>`).join("")
-    :'<span class="hint">Aucune grille enregistrée pour l\'instant.</span>';
-  $("#savedList").querySelectorAll("[data-load]").forEach(b=>b.onclick=()=>loadGrid(list[+b.dataset.load]));
-  $("#savedList").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>deleteGrid(list[+b.dataset.del]));
+    `<span class="saved-item"><b data-load="${i}" style="cursor:pointer" title="Charger">${g.favori?"★ ":""}${g.nom}</b>
+      <span>${g.tonique} ${g.mode==="min"?"min":"maj"} · ${(g.accords||[]).length}</span></span>`).join("")
+    :'<span class="hint">Aucune grille enregistrée. Tout se retrouve dans l\'onglet « Mes chemins ».</span>';
+  $("#savedList").querySelectorAll("[data-load]").forEach(b=>b.onclick=()=>{
+    const g=list[+b.dataset.load];
+    prog=(g.accords||[]).map(a=>({pc:a.pc,q:a.q,flat:a.flat,tag:a.tag,
+      frets:(a.frets||[]).map(f=>f===-1?null:f),label:a.nom}));
+    renderProg();
+  });
 }
 $("#saveProg").onclick=saveGrid;
 
@@ -1377,20 +1573,20 @@ function renderFretboard(){
   const NF=16,nutX=66,fw=56,W=nutX+NF*fw+30,rowH=30,topY=30,H=topY+5*rowH+58;
   const sx=f=>f===0?nutX-26:nutX+(f-0.5)*fw, sy=s=>topY+(5-s)*rowH;
   let g=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Manche de guitare, ${SCALES[scaleKey].n} de ${spell(scaleRootPc)}">`;
-  g+=`<rect x="${nutX}" y="${topY-9}" width="${NF*fw}" height="${5*rowH+18}" fill="#241B16"/>`;
-  [3,5,7,9,15].forEach(f=>{g+=`<circle cx="${nutX+(f-0.5)*fw}" cy="${topY+2.5*rowH}" r="7" fill="#3A2E27"/>`;});
-  g+=`<circle cx="${nutX+11.5*fw}" cy="${topY+1.5*rowH}" r="7" fill="#3A2E27"/><circle cx="${nutX+11.5*fw}" cy="${topY+3.5*rowH}" r="7" fill="#3A2E27"/>`;
-  for(let f=1;f<=NF;f++) g+=`<line x1="${nutX+f*fw}" y1="${topY-9}" x2="${nutX+f*fw}" y2="${topY+5*rowH+9}" stroke="#6A574A" stroke-width="1.5"/>`;
-  g+=`<rect x="${nutX-4}" y="${topY-10}" width="5" height="${5*rowH+20}" fill="#D8C7B5" rx="1"/>`;
-  for(let s=0;s<6;s++) g+=`<line x1="${nutX-30}" y1="${sy(s)}" x2="${nutX+NF*fw}" y2="${sy(s)}" stroke="#8A7869" stroke-width="${0.8+s*0.28}"/>`;
-  for(let s=0;s<6;s++) g+=`<text x="${nutX-46}" y="${sy(s)+4}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#8A7869">${STR_LAB[s]}</text>`;
-  for(let f=1;f<=NF;f++) g+=`<text x="${nutX+(f-0.5)*fw}" y="${topY+5*rowH+32}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11.5" fill="${[3,5,7,9,12,15].indexOf(f)>=0?"#B4A294":"#6A574A"}">${f}</text>`;
+  g+=`<rect x="${nutX}" y="${topY-9}" width="${NF*fw}" height="${5*rowH+18}" fill="${PAL.wood}"/>`;
+  [3,5,7,9,15].forEach(f=>{g+=`<circle cx="${nutX+(f-0.5)*fw}" cy="${topY+2.5*rowH}" r="7" fill="${PAL.inlay}"/>`;});
+  g+=`<circle cx="${nutX+11.5*fw}" cy="${topY+1.5*rowH}" r="7" fill="${PAL.inlay}"/><circle cx="${nutX+11.5*fw}" cy="${topY+3.5*rowH}" r="7" fill="${PAL.inlay}"/>`;
+  for(let f=1;f<=NF;f++) g+=`<line x1="${nutX+f*fw}" y1="${topY-9}" x2="${nutX+f*fw}" y2="${topY+5*rowH+9}" stroke="${PAL.fret}" stroke-width="1.5"/>`;
+  g+=`<rect x="${nutX-4}" y="${topY-10}" width="5" height="${5*rowH+20}" fill="${PAL.nut}" rx="1"/>`;
+  for(let s=0;s<6;s++) g+=`<line x1="${nutX-30}" y1="${sy(s)}" x2="${nutX+NF*fw}" y2="${sy(s)}" stroke="${PAL.string}" stroke-width="${0.8+s*0.28}"/>`;
+  for(let s=0;s<6;s++) g+=`<text x="${nutX-46}" y="${sy(s)+4}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="${PAL.dim}">${STR_LAB[s]}</text>`;
+  for(let f=1;f<=NF;f++) g+=`<text x="${nutX+(f-0.5)*fw}" y="${topY+5*rowH+32}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11.5" fill="${[3,5,7,9,12,15].indexOf(f)>=0?PAL.mute:PAL.fret}">${f}</text>`;
   scaleNotes().forEach(n=>{
     const cx=sx(n.f),cy=sy(n.s);
     const lab = labelMode==="deg" ? DEG_LAB[n.iv] : spell(scaleRootPc+n.iv, FLAT_MIN.indexOf(scaleRootPc)>=0);
     g+=`<g class="fbnote" data-midi="${n.midi}">
-      <circle cx="${cx}" cy="${cy}" r="11.5" fill="${n.root?"#F2A93B":"#123430"}" stroke="${n.root?"#F2A93B":"#4FC2AE"}" stroke-width="1.6"/>
-      <text x="${cx}" y="${cy+4}" text-anchor="middle" font-family="Archivo, sans-serif" font-size="${lab.length>1?9.5:11}" font-weight="700" fill="${n.root?"#1A1207":"#8FE6D6"}">${lab}</text></g>`;
+      <circle cx="${cx}" cy="${cy}" r="11.5" fill="${n.root?PAL.T:PAL.noteBg}" stroke="${n.root?PAL.T:PAL.noteSt}" stroke-width="1.6"/>
+      <text x="${cx}" y="${cy+4}" text-anchor="middle" font-family="Archivo, sans-serif" font-size="${lab.length>1?9.5:11}" font-weight="700" fill="${n.root?PAL.onAcc:PAL.noteTx}">${lab}</text></g>`;
   });
   $("#fretboard").innerHTML=g+"</svg>";
   const sc=SCALES[scaleKey];
@@ -1591,7 +1787,22 @@ function renderPath(){
 function stopPath(){
   pathPlaying=false; pathTimers.forEach(clearTimeout); pathTimers=[];
   document.querySelectorAll(".path-step").forEach(e=>e.classList.remove("playing"));
-  $("#playPath").textContent="▶ Jouer le chemin";
+  const pb=$("#playPath"); if(pb) pb.textContent="▶ Jouer le chemin";
+  const pn=$("#pathNow"); if(pn) pn.hidden=true;
+}
+function showNow(cur,next,beat,beats){
+  const v=voicings(cur.pc,cur.q,cur.flat)[0];
+  $("#pathNow").hidden=false;
+  $("#pathNow").innerHTML=`
+    <div>${v?diagram(v):""}</div>
+    <div><p class="now-lab">Maintenant</p><p class="now-chord">${cname(cur.pc,cur.q,cur.flat)}</p>
+      <div class="now-beat">${Array.from({length:beats},(_,k)=>`<i class="${k===beat?"on":""}"></i>`).join("")}</div></div>
+    <div><p class="now-lab">Ensuite</p><p class="now-next">${next?cname(next.pc,next.q,next.flat):"—"}</p></div>`;
+}
+function pathBeat(i,beats,cur,next){
+  const els=document.querySelectorAll(".path-step");
+  els.forEach((e,k)=>e.classList.toggle("playing",k===i));
+  showNow(cur,next,0,beats);
 }
 $("#playPath").onclick=()=>{
   if(pathPlaying){stopPath();return;}
@@ -1600,15 +1811,49 @@ $("#playPath").onclick=()=>{
   if(!soundOn){soundOn=true;$("#sound").setAttribute("aria-pressed","true");}
   ensureAC();
   pathPlaying=true; $("#playPath").textContent="■ Arrêter";
-  const t0=AC.currentTime+0.1,step=1.5,els=document.querySelectorAll(".path-step");
-  full.forEach((p,i)=>{
-    const vo=voicings(p.pc,p.q)[0]; if(vo) strum(vo.frets,t0+i*step,false,0.11,step*0.9);
-    pathTimers.push(setTimeout(()=>{els.forEach((e,k)=>e.classList.toggle("playing",k===i));},
-      Math.max(0,(t0-AC.currentTime+i*step)*1000)));
-  });
-  pathTimers.push(setTimeout(stopPath,(t0-AC.currentTime+full.length*step)*1000));
+  const beats=+$("#pathBeats").value,looping=$("#pathLoop").getAttribute("aria-pressed")==="true";
+  const step=(60/bpm)*beats;
+  let idx=0,t=AC.currentTime+0.15;
+  const schedule=()=>{
+    if(!pathPlaying) return;
+    while(pathPlaying && t < AC.currentTime+0.4){
+      const i=idx%full.length,cur=full[i],next=full[(i+1)%full.length];
+      const vo=voicings(cur.pc,cur.q,cur.flat)[0];
+      if(vo){
+        if(playMode==="arp") arpeggio(vo.frets,t,step*0.95,0.11);
+        else strum(vo.frets,t,false,0.12,step*0.92);
+      }
+      const at=Math.max(0,(t-AC.currentTime)*1000);
+      pathTimers.push(setTimeout(()=>pathBeat(i,beats,cur,next),at));
+      for(let b=1;b<beats;b++){
+        const bt=at+b*(60/bpm)*1000;
+        pathTimers.push(setTimeout(()=>{const n=$("#pathNow").querySelectorAll(".now-beat i");
+          n.forEach((e,k)=>e.classList.toggle("on",k===b));},bt));
+      }
+      t+=step; idx++;
+      if(!looping&&idx>=full.length){
+        pathTimers.push(setTimeout(stopPath,(t-AC.currentTime)*1000+200));
+        return;
+      }
+    }
+    pathTimers.push(setTimeout(schedule,80));
+  };
+  schedule();
+};
+$("#pathLoop").onclick=e=>{
+  const on=e.currentTarget.getAttribute("aria-pressed")==="true";
+  e.currentTarget.setAttribute("aria-pressed",String(!on));
 };
 $("#clearPath").onclick=()=>{stopPath();navPath=[];renderPath();};
+$("#savePath").onclick=()=>{
+  const full=navPath.concat([{pc:navPc,q:navQ,r:"arrivée"}]);
+  if(full.length<2){hint("Construis d'abord un chemin d'au moins deux accords.");return;}
+  const items=full.map(x=>{const vo=voicings(x.pc,x.q)[0];
+    return {pc:x.pc,q:x.q,tag:x.r||"",label:cname(x.pc,x.q),frets:vo?vo.frets:[]};});
+  const nom="Chemin "+cname(full[0].pc,full[0].q)+" → "+cname(navPc,navQ);
+  saveItem("chemin",nom,items).then(()=>{if(!$("#view-mes").hidden)renderMes();
+    hint("Chemin enregistré. Retrouve-le dans « Mes chemins ».");});
+};
 $("#toLoop").onclick=()=>{
   const full=navPath.concat([{pc:navPc,q:navQ}]);
   prog=full.map(p=>{const vo=voicings(p.pc,p.q)[0];
@@ -1616,6 +1861,102 @@ $("#toLoop").onclick=()=>{
   renderProg(); switchTab("harmonie");
   window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
 };
+
+/* ===================== dictionnaire d'accords ===================== */
+const DICT={
+ tri:["maj","min","dim","aug","sus2","sus4"],
+ sept:["maj7","7","m7","m7b5","dim7","6","m6","7s4"],
+ neuf:["add9","9","maj9","m9","69","13","7s9","7b9"]
+};
+let dictPc=0,dictFam="tri";
+function dictCard(v,rootPc){
+  return `<div class="voicing">
+    <div class="v-head"><span class="v-name">${v.name}</span><span class="v-shape">${v.shape}</span></div>
+    ${diagram(v)}
+    <p class="v-desc">${vDesc(v,rootPc)}</p>
+    <pre class="tab">${tab(v)}</pre>
+    <div class="v-foot"><button type="button" class="vp" data-frets="${v.frets.map(f=>f===null?"x":f).join(",")}">écouter</button></div>
+  </div>`;
+}
+function renderChords(){
+  const fams = dictFam==="all" ? DICT.tri.concat(DICT.sept,DICT.neuf) : DICT[dictFam];
+  $("#dictRoots").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.pc===dictPc)));
+  $("#dict").innerHTML=fams.map(q=>{
+    const vs=voicings(dictPc,q);
+    if(!vs.length) return "";
+    return `<div class="dict-block">
+      <div class="dict-head"><h3>${cname(dictPc,q)}</h3>
+        <span>${QUAL[q].lab}</span>
+        <code>${QUAL[q].iv.map(i=>spell(dictPc+i)).join(" · ")}</code>
+        <span style="color:var(--ink-dim)">${vs.length} doigté${vs.length>1?"s":""}</span></div>
+      <div class="dict-v">${vs.map(v=>dictCard(v,dictPc)).join("")}</div>
+    </div>`;
+  }).join("")||'<p class="hint">Aucun doigté pour cette famille.</p>';
+  $("#dict").querySelectorAll(".vp").forEach(b=>b.onclick=()=>
+    strum(b.dataset.frets.split(",").map(v=>v==="x"?null:+v)));
+}
+(function initDict(){
+  $("#dictRoots").innerHTML=ROOTS.map(r=>`<button type="button" data-pc="${r.pc}">${r.n}</button>`).join("");
+  $("#dictRoots").onclick=e=>{const b=e.target.closest("button"); if(!b) return; dictPc=+b.dataset.pc; renderChords();};
+  $("#dictFam").onchange=e=>{dictFam=e.target.value;renderChords();};
+})();
+
+/* ===================== mes chemins & grilles ===================== */
+function summarize(items){ return items.map(a=>a.nom||cname(a.pc,a.q,a.flat)).join(" – "); }
+let mesFilter="tout";
+async function renderMes(){
+  const all=await listGrids();
+  const list=all.filter(g=>mesFilter==="tout"||g.kind===mesFilter);
+  $("#mesList").innerHTML=`
+    <div class="work-controls" style="margin-bottom:14px">
+      <label class="field"><span>Afficher</span>
+        <select id="mesFil">
+          <option value="tout">Tout</option>
+          <option value="chemin">Chemins</option>
+          <option value="grille">Grilles</option>
+        </select></label>
+      <span class="hint" style="width:auto">${all.length} enregistrement${all.length>1?"s":""}</span>
+    </div>`+
+    (list.length?list.map((g,i)=>`<div class="mes-item">
+      <button type="button" class="btn small" data-fav="${i}" title="Favori">${g.favori?"★":"☆"}</button>
+      <span class="mes-kind ${g.kind}">${g.kind}</span>
+      <input type="text" id="mes-n-${i}" value="${(g.nom||"").replace(/"/g,"&quot;")}" data-ren="${i}" aria-label="Nom">
+      <span class="mes-sum">${g.resume||summarize(g.accords||[])}</span>
+      <span class="mes-kind">${g.tonique||""} ${g.mode==="min"?"min":"maj"}</span>
+      ${g.createur?`<span class="mes-kind">${g.createur}</span>`:""}
+      <button type="button" class="btn small" data-load="${i}">Charger</button>
+      <button type="button" class="btn small" data-play="${i}">Écouter</button>
+      <button type="button" class="btn small" data-del="${i}">Supprimer</button>
+    </div>`).join("")
+    :'<p class="hint">Rien ici pour l\'instant. Construis un chemin dans le réseau, ou une grille dans la boucle, puis clique « Enregistrer ».</p>');
+  $("#mesFil").value=mesFilter;
+  $("#mesFil").onchange=e=>{mesFilter=e.target.value;renderMes();};
+  const load=g=>{
+    const items=(g.accords||[]).map(a=>({pc:a.pc,q:a.q,flat:a.flat,tag:a.tag,
+      frets:(a.frets||[]).map(f=>f===-1?null:f),label:a.nom||cname(a.pc,a.q,a.flat)}));
+    if(g.kind==="chemin"){
+      navPath=items.slice(0,-1).map(x=>({pc:x.pc,q:x.q,r:x.tag}));
+      const last=items[items.length-1];
+      if(last){navPc=last.pc;navQ=last.q;}
+      switchTab("reseau");
+    }else{ prog=items; renderProg(); switchTab("harmonie"); }
+    window.scrollTo({top:0,behavior:"smooth"});
+  };
+  $("#mesList").querySelectorAll("[data-load]").forEach(b=>b.onclick=()=>load(list[+b.dataset.load]));
+  $("#mesList").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>deleteGrid(list[+b.dataset.del]).then(renderMes));
+  $("#mesList").querySelectorAll("[data-fav]").forEach(b=>b.onclick=()=>favGrid(list[+b.dataset.fav]).then(renderMes));
+  $("#mesList").querySelectorAll("[data-ren]").forEach(inp=>{
+    inp.onchange=()=>renameGrid(list[+inp.dataset.ren],inp.value.trim()).then(renderMes);
+  });
+  $("#mesList").querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>{
+    const items=list[+b.dataset.play].accords||[];
+    if(!soundOn){soundOn=true;$("#sound").setAttribute("aria-pressed","true");}
+    ensureAC();
+    const t0=AC.currentTime+0.1,step=(60/bpm)*2;
+    items.forEach((a,k)=>{const f=(a.frets||[]).map(x=>x===-1?null:x);
+      strum(f,t0+k*step,false,0.11,step*0.9);});
+  });
+}
 
 /* ===================== rendu global ===================== */
 function render(){
@@ -1634,6 +1975,18 @@ function render(){
   scaleKey = mode==="maj"?"penta_maj":"penta_min"; $("#scaleSel").value=scaleKey;
   if(!$("#view-travail").hidden) renderFretboard();
 }
+(function initPrefs(){
+  $("#createur").innerHTML=CREATEURS.map(c=>`<option value="${c}">${c}</option>`).join("");
+  try{const c=localStorage.getItem("harmonie-createur"); if(c&&CREATEURS.indexOf(c)>=0) createur=c;}catch(e){}
+  $("#createur").value=createur;
+  $("#createur").onchange=e=>{createur=e.target.value;
+    try{localStorage.setItem("harmonie-createur",createur);}catch(e2){}};
+  let saved=null;
+  try{saved=localStorage.getItem("harmonie-theme");}catch(e){}
+  document.documentElement.setAttribute("data-theme",saved||currentTheme());
+  $("#theme").textContent=currentTheme()==="dark"?"☀︎ Jour":"☾ Nuit";
+  readPalette();
+})();
 render();
 renderFretboard();
 renderSaved();
@@ -1641,9 +1994,9 @@ renderSaved();
 /* Airtable comme backend ; repli sur le navigateur si le connecteur n'est pas joignable */
 if(window.claude&&window.claude.use){
   window.claude.use("mcp").then(m=>{
-    if(m){MCP=m;airOK=true;hint("Grilles enregistrées dans ta base Airtable « Guitare — Harmonie ».");}
-    else hint("Airtable n'est pas disponible dans cette vue — grilles enregistrées dans ce navigateur.");
-    renderSaved();
+    if(m){MCP=m;airOK=true;hint("Mémoire branchée sur ta base Airtable « Guitare — Harmonie ».");}
+    else hint("Airtable n'est pas disponible dans cette vue — tout est enregistré dans ce navigateur.");
+    renderSaved(); if(!$("#view-mes").hidden) renderMes();
   }).catch(()=>{hint("Grilles enregistrées dans ce navigateur.");});
 }else hint("Grilles enregistrées dans ce navigateur.");
 })();
