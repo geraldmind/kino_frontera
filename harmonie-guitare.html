@@ -446,7 +446,7 @@ footer{margin-top:40px;color:var(--ink-dim);font-size:12.5px}
         <p>Le chiffre à gauche indique la case de départ. <code>×</code> = corde étouffée, <code>○</code> = corde à vide, la barre pleine = index qui barre.</p>
       </div>
     </div>
-    <footer>Accordage standard EADGBE. Les doigtés proposés sont les plus courants, pas les seuls.</footer>
+    <footer><span id="ver"></span>Accordage standard EADGBE. Les doigtés proposés sont les plus courants, pas les seuls.</footer>
   </section>
 </section>
 
@@ -1372,7 +1372,7 @@ const AIR={base:"appnzisvARTfJG5di",table:"tbl23cy3ggY7kLm3s",
      notes:"fldJ62kd9jV7Do9XN",cree:"fldrQ7MTEkN2YFJph",
      type:"fldzvnALAQlpNnrdl",createur:"fldw8cBgQkQIYmafW",favori:"fldKEEcrVrrPFFN88"}};
 const CREATEURS=["Gérald","Axel","Jean-Louis Durand"];
-const LS_KEY="harmonie-grilles",API="/api/grilles";
+const LS_KEY="harmonie-grilles",API="/api/grilles",BUILD="13";
 let MCP=null,backend="local",createur=CREATEURS[0];
 const ERRS={
  needs_reauth:"Connexion Airtable expirée. Reconnecte Airtable dans claude.ai › Réglages › Connecteurs.",
@@ -1800,11 +1800,7 @@ function renderNav(){
   useFlat=prevFlat;
 }
 function renderPath(){
-  const row=$("#pathRow"),full=navPath.concat([{pc:navPc,q:navQ,r:"ici"}]);
-  if(full.length<2){
-    row.innerHTML='<span class="prog-empty">Clique une proposition : chaque pas s\'ajoute ici.</span>';
-    return;
-  }
+  const row=$("#pathRow"),full=navPath.concat([{pc:navPc,q:navQ,r:navPath.length?"ici":"départ"}]);
   row.innerHTML=full.map((p,i)=>
     `${i?'<span class="path-arrow">→</span>':""}<span class="path-step" data-pi="${i}">
       <b data-go="${i}" title="Revenir sur cet accord">${cname(p.pc,p.q,p.flat)}</b>
@@ -1813,7 +1809,8 @@ function renderPath(){
         <button type="button" data-play="${i}" aria-label="Écouter" title="Écouter">▸</button>
         <button type="button" data-add="${i}" aria-label="Ajouter à la boucle" title="Ajouter à la boucle">+</button>
         <button type="button" data-rm="${i}" aria-label="Retirer" title="Retirer du chemin">✕</button>
-      </span></span>`).join("");
+      </span></span>`).join("")
+    +(full.length<2?'<span class="prog-empty" style="margin-left:10px">Ton point de départ. Clique une proposition pour continuer.</span>':"");
   const at=i=>full[i];
   row.querySelectorAll("[data-play]").forEach(b=>b.onclick=()=>{
     const v=voicings(at(+b.dataset.play).pc,at(+b.dataset.play).q)[0]; if(v) strum(v.frets);});
@@ -1862,7 +1859,7 @@ function pathBeat(i,beats,cur,next){
 $("#playPath").onclick=()=>{
   if(pathPlaying){stopPath();return;}
   const full=navPath.concat([{pc:navPc,q:navQ}]);
-  if(full.length<2) return;
+  if(!full.length) return;
   if(!soundOn){soundOn=true;$("#sound").setAttribute("aria-pressed","true");}
   ensureAC();
   pathPlaying=true; $("#playPath").textContent="■ Arrêter";
@@ -1901,11 +1898,12 @@ $("#pathLoop").onclick=e=>{
 };
 $("#clearPath").onclick=()=>{stopPath();navPath=[];renderPath();};
 $("#savePath").onclick=()=>{
-  const full=navPath.concat([{pc:navPc,q:navQ,r:"arrivée"}]);
-  if(full.length<2){hint("Construis d'abord un chemin d'au moins deux accords.");return;}
+  const full=navPath.concat([{pc:navPc,q:navQ,r:navPath.length?"arrivée":"départ"}]);
   const items=full.map(x=>{const vo=voicings(x.pc,x.q)[0];
     return {pc:x.pc,q:x.q,tag:x.r||"",label:cname(x.pc,x.q),frets:vo?vo.frets:[]};});
-  const nom="Chemin "+cname(full[0].pc,full[0].q)+" → "+cname(navPc,navQ);
+  const nom=full.length>1
+    ? "Chemin "+cname(full[0].pc,full[0].q)+" → "+cname(navPc,navQ)
+    : "Départ sur "+cname(navPc,navQ);
   saveItem("chemin",nom,items).then(()=>{if(!$("#view-mes").hidden)renderMes();
     hint("Chemin enregistré. Retrouve-le dans « Mes chemins ».");});
 };
@@ -2010,6 +2008,9 @@ function playList(items,sel,btn){
   detTimers.push(setTimeout(stopDet,(t0-AC.currentTime+items.length*step)*1000+300));
 }
 async function saveDraft(item){
+  /* Garde-fou : si la lecture est revenue vide, une édition écraserait
+     les accords réellement stockés. On refuse d'écrire du vide. */
+  if(!mesDraft.length){hint("Rien à enregistrer : ce chemin est revenu vide.");return;}
   const accords=mesDraft.map(a=>({tag:a.tag,pc:a.pc,q:a.q,flat:!!a.flat,vi:a.vi||0,
     nom:cname(a.pc,a.q,a.flat),frets:(a.frets||[]).map(f=>f===null?-1:f)}));
   item.accords=accords; item.resume=accords.map(a=>a.nom).join(" – ");
@@ -2033,6 +2034,7 @@ function renderDetail(item){
       <button type="button" class="btn" id="detNet">Ouvrir dans le réseau</button>
       <button type="button" class="btn danger" id="detDel">Supprimer</button>
     </div>
+    ${mesDraft.length?"":'<p class="hint">Ce chemin est revenu vide de la base. Recharge la page : si le problème persiste, ses accords n\'ont pas été relus correctement — n\'édite rien ici, ça écraserait ce qui est stocké.</p>'}
     <div class="det-chords">${mesDraft.map((a,i)=>{
       const vs=voicings(a.pc,a.q,a.flat);
       const v=vs[Math.min(a.vi||0,vs.length-1)];
@@ -2204,6 +2206,7 @@ function render(){
   $("#theme").textContent=currentTheme()==="dark"?"☀︎ Jour":"☾ Nuit";
   readPalette();
 })();
+$("#ver").textContent="Version "+BUILD+" · ";
 render();
 renderFretboard();
 renderSaved();
@@ -2214,7 +2217,7 @@ renderSaved();
     try{
       const r=await fetch(API,{method:"GET"});
       if(r.ok){ await r.json(); backend="api";
-        hint("Mémoire branchée sur la base Airtable du site.");
+        hint("Mémoire branchée sur la base Airtable du site. (version "+BUILD+")");
         renderSaved(); if(!$("#view-mes").hidden) renderMes(); return; }
     }catch(e){}
   }
@@ -2222,7 +2225,7 @@ renderSaved();
     try{
       const m=await window.claude.use("mcp");
       if(m){ MCP=m; backend="mcp";
-        hint("Mémoire branchée sur ta base Airtable « Guitare — Harmonie ».");
+        hint("Mémoire branchée sur ta base Airtable « Guitare — Harmonie ». (version "+BUILD+")");
         renderSaved(); if(!$("#view-mes").hidden) renderMes(); return; }
     }catch(e){}
   }
