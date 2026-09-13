@@ -252,6 +252,33 @@ select,input[type=text]{background:var(--panel-2);border:1px solid var(--line);c
 .prop-play{background:transparent;border:1px solid var(--line);color:var(--ink-dim);border-radius:2px;font-size:11px;padding:3px 7px;cursor:pointer;align-self:center}
 .prop-play:hover{color:var(--ink);border-color:var(--SD)}
 
+dialog#ask{border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);
+  padding:22px;max-width:min(440px,92vw);box-shadow:0 24px 60px rgba(0,0,0,.35)}
+dialog#ask::backdrop{background:rgba(10,7,5,.62)}
+.ask-t{font-family:var(--display);font-size:22px;font-weight:600;margin:0 0 6px}
+.ask-b{font-size:14px;color:var(--ink-mute);margin:0 0 18px}
+.ask-a{display:flex;gap:8px;justify-content:flex-end}
+.btn.danger{background:var(--D);border-color:var(--D);color:var(--on-accent)}
+.btn.danger:hover{filter:brightness(1.08)}
+/* détail d'un chemin */
+.det-head{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px}
+.det-head input[type=text]{font-family:var(--display);font-size:22px;font-weight:600;flex:1;min-width:220px;padding:8px 10px}
+.det-chords{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:14px}
+.det-c{background:var(--panel);border:1px solid var(--line-soft);border-radius:5px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.det-c.playing{border-color:var(--T);box-shadow:0 0 0 1px var(--T)}
+.det-n{font-weight:700;font-size:19px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.det-n span{font-family:var(--mono);font-size:10.5px;color:var(--ink-dim);font-weight:400}
+.det-c svg{max-width:132px;margin:0 auto;display:block}
+.det-b{display:flex;gap:3px}
+.det-b button{flex:1;background:transparent;border:1px solid var(--line-soft);color:var(--ink-dim);border-radius:2px;font-size:11px;padding:4px 0;cursor:pointer;font-family:var(--ui)}
+.det-b button:hover{color:var(--ink);border-color:var(--T)}
+.det-alt{border-top:1px solid var(--line-soft);padding-top:8px}
+.det-alt p{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim);font-weight:600;margin:0 0 6px}
+.det-alt button{display:block;width:100%;text-align:left;background:transparent;border:1px solid var(--line-soft);
+  border-radius:3px;padding:5px 8px;margin-bottom:4px;cursor:pointer;color:var(--ink);font-family:var(--ui)}
+.det-alt button:hover{border-color:var(--C);background:var(--C-deep)}
+.det-alt b{font-size:13px;font-weight:700}
+.det-alt em{display:block;font-style:normal;font-size:10.5px;color:var(--ink-mute);line-height:1.35}
 /* dictionnaire + chemins */
 .dict-block{background:var(--panel);border:1px solid var(--line-soft);border-radius:5px;padding:16px;margin-bottom:16px}
 .dict-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;margin-bottom:4px}
@@ -512,6 +539,14 @@ footer{margin-top:40px;color:var(--ink-dim);font-size:12.5px}
 </section>
 
 </main>
+<dialog id="ask">
+  <p class="ask-t" id="askT">Supprimer ?</p>
+  <p class="ask-b" id="askB"></p>
+  <div class="ask-a">
+    <button type="button" class="btn" id="askNo">Annuler</button>
+    <button type="button" class="btn danger" id="askYes">Supprimer</button>
+  </div>
+</dialog>
 
 <script>
 (function(){
@@ -707,20 +742,24 @@ const TONE={
  nylon:{kind:"pluck",n:"Classique (nylon)",damp:0.9948,loop:0.50,noise:0.13,pick:0.13,
         bright:3000,dur:3.6,spread:0.030,gain:0.9,
         body:[[110,1.6,0.9],[215,2.0,1.4],[430,1.8,1.8]]},
- steel:{kind:"pluck",n:"Folk (acier)",damp:0.9974,loop:0.74,noise:0.34,pick:0.09,
-        bright:5400,dur:4.2,spread:0.026,gain:0.8,
-        body:[[104,1.4,1.0],[230,1.8,1.5],[520,1.6,1.8]]},
+ steel:{kind:"pluck",n:"Folk (acier)",damp:0.9968,loop:0.66,noise:0.20,pick:0.11,
+        bright:4300,dur:3.8,spread:0.028,gain:0.8,
+        body:[[104,1.2,1.0],[230,1.6,1.5],[520,1.2,1.8]]},
  bass:{kind:"pluck",n:"Basse",damp:0.9988,loop:0.30,noise:0.16,pick:0.22,
         bright:1150,dur:4.2,spread:0.05,gain:1.1,shift:-12,low:2,
         body:[[78,2.2,0.8],[190,1.0,1.3]]},
- piano:{kind:"piano",n:"Piano",dur:3.8,spread:0.010,gain:0.85,bright:6000,
-        partials:15,inh:0.00035,decay:2.6,body:[[200,1.2,1.2],[1100,1.0,1.6]]},
- violin:{kind:"bow",n:"Violon",spread:0.055,gain:0.30,attack:0.14,release:0.32,
-         bright:2500,vib:5.2,vibC:8,vibDelay:0.28,maxVoices:4,
+ /* un piano acoustique, c'est deux à trois cordes par note, très légèrement
+    désaccordées : ce battement lent est ce qui le distingue d'un Rhodes.
+    Et la note s'éteint vite — d'où la décroissance à deux pentes.        */
+ piano:{kind:"piano",n:"Piano",dur:2.6,spread:0.009,gain:0.9,bright:4800,
+        partials:12,inh:0.0004,decay:1.5,fast:0.22,fastMix:0.42,
+        unison:[0,0.55,-0.55],body:[[190,1.4,1.1],[950,0.8,1.6]]},
+ violin:{kind:"bow",n:"Violon",spread:0.05,gain:0.30,attack:0.10,release:0.22,
+         bright:2500,vib:5.3,vibC:9,vibDelay:0.22,maxVoices:4,hold:1.15,fade:0.55,
          body:[[300,4.5,1.2],[700,3.5,1.4],[2800,3,2.2]]},
- trumpet:{kind:"brass",n:"Trompette",spread:0.045,gain:0.26,attack:0.055,release:0.22,
-          bright:2900,vib:5.6,vibC:5,vibDelay:0.35,maxVoices:3,
-          body:[[1150,5,1.5],[2300,3,2]]}
+ trumpet:{kind:"brass",n:"Trompette",spread:0.035,gain:0.26,attack:0.018,release:0.16,
+          bright:3200,vib:5.6,vibC:5,vibDelay:0.3,maxVoices:3,hold:1.1,fade:0.7,
+          blat:2.1,body:[[1150,5,1.5],[2300,3,2]]}
 };
 let AC=null,soundOn=false,toneKey="nylon",master=null,bufCache={},ringing=[];
 function ensureAC(){
@@ -779,23 +818,28 @@ function stringBuffer(midi){
 function pianoBuffer(midi){
   const T=TONE[toneKey],sr=AC.sampleRate,f=440*Math.pow(2,(midi-69)/12);
   const len=Math.floor(sr*T.dur),buf=AC.createBuffer(1,len,sr),d=buf.getChannelData(0);
-  const base=T.decay*Math.pow(2,(60-midi)/26);
+  const base=T.decay*Math.pow(2,(60-midi)/24);
+  const uni=T.unison||[0];
   for(let n=1;n<=T.partials;n++){
-    const fn=f*n*Math.sqrt(1+T.inh*n*n);
-    if(fn>sr*0.45) break;
-    const amp=Math.pow(n,-1.4)*(n%2?1:0.7),dec=base/(1+0.5*(n-1));
-    const w=2*Math.PI*fn/sr,ph=Math.random()*6.283;
-    for(let q=0;q<len;q++){
-      const e=Math.exp(-q/(sr*dec));
-      if(e<0.0002) break;
-      d[q]+=amp*e*Math.sin(w*q+ph);
+    const fn0=f*n*Math.sqrt(1+T.inh*n*n);
+    if(fn0>sr*0.45) break;
+    const amp=Math.pow(n,-1.55)*(n%2?1:0.62)/uni.length;
+    const slow=base/(1+0.55*(n-1)), fast=T.fast/(1+0.6*(n-1));
+    for(let u=0;u<uni.length;u++){
+      const fn=fn0*Math.pow(2,uni[u]/1200);     // désaccord en cents
+      const w=2*Math.PI*fn/sr, ph=Math.random()*6.283;
+      for(let q=0;q<len;q++){
+        const e=(1-T.fastMix)*Math.exp(-q/(sr*slow))+T.fastMix*Math.exp(-q/(sr*fast));
+        if(e<0.0002) break;
+        d[q]+=amp*e*Math.sin(w*q+ph);
+      }
     }
   }
   let nz=0;
-  const hammer=Math.floor(sr*0.012);
+  const hammer=Math.floor(sr*0.009);            // le feutre qui frappe
   for(let q=0;q<hammer;q++){
-    nz+=((Math.random()*2-1)-nz)*0.5;
-    d[q]+=nz*0.35*(1-q/hammer);
+    nz+=((Math.random()*2-1)-nz)*0.62;
+    d[q]+=nz*0.42*(1-q/hammer);
   }
   return finish(buf,d,len,sr);
 }
@@ -849,16 +893,20 @@ function sustained(midi,t,gain,dur,str,T){
   lg.gain.linearRampToValueAtTime(T.vibC,t+T.vibDelay+0.35);
   lfo.connect(lg); lg.connect(o.detune);
   const lp=AC.createBiquadFilter(); lp.type="lowpass"; lp.Q.value=0.7;
-  lp.frequency.setValueAtTime(T.bright*0.35,t);
-  lp.frequency.linearRampToValueAtTime(T.bright,t+T.attack*1.6);
+  lp.frequency.setValueAtTime(T.bright*0.3,t);
+  if(T.blat){                                   /* le coup de langue du cuivre */
+    lp.frequency.linearRampToValueAtTime(T.bright*T.blat,t+T.attack);
+    lp.frequency.exponentialRampToValueAtTime(T.bright,t+T.attack+0.16);
+  }else lp.frequency.linearRampToValueAtTime(T.bright,t+T.attack*1.8);
   o.connect(lp);
   const end=shape(lp,T);
   const g=AC.createGain(),v=(gain||0.11)*T.gain*3.1;
-  const stop=t+Math.max(0.25,dur);
+  /* une note tenue doit quand même décroître, sinon elle ronronne */
+  const stop=t+Math.max(0.25,Math.min(dur,T.hold||dur));
   g.gain.setValueAtTime(0.0001,t);
-  g.gain.exponentialRampToValueAtTime(v*1.12,t+T.attack);
-  g.gain.exponentialRampToValueAtTime(v*0.86,t+T.attack+0.25);
-  g.gain.setValueAtTime(v*0.86,stop);
+  g.gain.exponentialRampToValueAtTime(v*(T.blat?1.35:1.1),t+T.attack);
+  g.gain.exponentialRampToValueAtTime(v*0.82,t+T.attack+0.18);
+  g.gain.exponentialRampToValueAtTime(v*(T.fade||0.7),Math.max(t+T.attack+0.2,stop));
   g.gain.exponentialRampToValueAtTime(0.0001,stop+T.release);
   end.connect(g);
   out(g,str);
@@ -874,7 +922,7 @@ function out(g,str){
 }
 function pluck(midi,t,gain,str,dur){
   const T=TONE[toneKey];
-  if(T.kind==="bow"||T.kind==="brass") sustained(midi,t,gain,dur||1.6,str,T);
+  if(T.kind==="bow"||T.kind==="brass") sustained(midi,t,gain,dur||1.4,str,T);
   else struck(midi,t,gain,str,T);
 }
 function silence(){
@@ -882,6 +930,7 @@ function silence(){
   if(typeof stopScale==="function") stopScale();
   if(typeof stopPath==="function") stopPath();
   if(typeof stopMetro==="function") stopMetro();
+  if(typeof stopDet==="function") stopDet();
   if(!AC) return;
   const now=AC.currentTime;
   ringing.forEach(v=>{
@@ -1103,7 +1152,7 @@ function switchTab(name){
   if(name==="travail") renderFretboard(); else stopScale();
   if(name==="reseau"){renderNav();renderPath();} else stopPath();
   if(name==="accords") renderChords();
-  if(name==="mes") renderMes();
+  if(name==="mes") renderMes(); else stopDet();
 }
 
 /* ===================== carte ===================== */
@@ -1973,9 +2022,142 @@ function renderChords(){
 
 /* ===================== mes chemins & grilles ===================== */
 function summarize(items){ return items.map(a=>a.nom||cname(a.pc,a.q,a.flat)).join(" – "); }
-let mesFilter="tout";
+let mesFilter="tout",mesOpen=null,mesDraft=null,detTimers=[],detPlaying=false;
+
+/* Remplacer un accord sans casser la phrase : on cherche les accords qui
+   partagent au moins deux notes avec lui, en favorisant ceux qui tiennent
+   aussi avec le voisin d'avant et celui d'après. */
+function alternatives(prev,cur,next){
+  const me={pc:cur.pc,q:cur.q},out=[],QS=["maj","min","7","m7","maj7","m9","6","sus4"];
+  for(let r=0;r<12;r++) QS.forEach(q=>{
+    if(r===cur.pc&&FAM[q]===FAM[cur.q]) return;
+    const c={pc:r,q},ct=commonTones(me,c).length;
+    if(ct<2) return;
+    const rel=relation(cur.pc,cur.q,r,q);
+    let score=ct*3;
+    if(prev) score+=commonTones({pc:prev.pc,q:prev.q},c).length;
+    if(next) score+=commonTones({pc:next.pc,q:next.q},c).length;
+    if(rel.n==="Mouvement chromatique") score-=3;
+    out.push({pc:r,q,score,r:rel.n,w:rel.w});
+  });
+  out.sort((a,b)=>b.score-a.score);
+  const seen={},res=[];
+  out.forEach(o=>{const k=o.pc+"|"+FAM[o.q]; if(seen[k]||res.length>=3) return; seen[k]=1; res.push(o);});
+  return res;
+}
+function confirmer(titre,texte,onOui){
+  const d=$("#ask");
+  $("#askT").textContent=titre; $("#askB").textContent=texte;
+  const no=()=>{d.close();};
+  $("#askNo").onclick=no;
+  $("#askYes").onclick=()=>{d.close();onOui();};
+  if(d.showModal) d.showModal(); else onOui();
+}
+function stopDet(){
+  detPlaying=false; detTimers.forEach(clearTimeout); detTimers=[];
+  document.querySelectorAll(".det-c").forEach(e=>e.classList.remove("playing"));
+  const b=$("#detPlay"); if(b) b.textContent="▶ Jouer";
+}
+function playList(items,sel,btn){
+  if(detPlaying){stopDet();return;}
+  if(!items.length) return;
+  if(!soundOn){soundOn=true;$("#sound").setAttribute("aria-pressed","true");}
+  ensureAC(); detPlaying=true; if(btn) btn.textContent="■ Arrêter";
+  const t0=AC.currentTime+0.12,step=(60/bpm)*4,els=document.querySelectorAll(sel);
+  items.forEach((a,k)=>{
+    const f=(a.frets||[]).map(x=>x===-1?null:x);
+    if(playMode==="arp") arpeggio(f,t0+k*step,step*0.95,0.11);
+    else strum(f,t0+k*step,false,0.12,step*0.92);
+    detTimers.push(setTimeout(()=>els.forEach((e,z)=>e.classList.toggle("playing",z===k)),
+      Math.max(0,(t0-AC.currentTime+k*step)*1000)));
+  });
+  detTimers.push(setTimeout(stopDet,(t0-AC.currentTime+items.length*step)*1000+300));
+}
+async function saveDraft(item){
+  const accords=mesDraft.map(a=>({tag:a.tag,pc:a.pc,q:a.q,flat:!!a.flat,
+    nom:cname(a.pc,a.q,a.flat),frets:(a.frets||[]).map(f=>f===null?-1:f)}));
+  item.accords=accords; item.resume=accords.map(a=>a.nom).join(" – ");
+  await patchGrid(item,{accords,resume:item.resume});
+}
+function renderDetail(item){
+  mesDraft=(item.accords||[]).map(a=>({tag:a.tag,pc:a.pc,q:a.q,flat:a.flat,
+    nom:a.nom,frets:(a.frets||[]).map(f=>f===-1?null:f)}));
+  const refresh=()=>{renderDetail(item);};
+  $("#mesList").innerHTML=`
+    <div class="det-head">
+      <button type="button" class="btn" id="detBack">← Retour</button>
+      <input type="text" id="detName" value="${(item.nom||"").replace(/"/g,"&quot;")}" aria-label="Nom">
+      <span class="mes-kind ${item.kind}">${item.kind}</span>
+      <span class="mes-kind">${item.tonique||""} ${item.mode==="min"?"min":"maj"}</span>
+      ${item.createur?`<span class="mes-kind">${item.createur}</span>`:""}
+    </div>
+    <div class="prog-actions" style="margin-bottom:16px">
+      <button type="button" class="btn primary" id="detPlay">▶ Jouer</button>
+      <button type="button" class="btn" id="detLoop">Envoyer vers la boucle</button>
+      <button type="button" class="btn" id="detNet">Ouvrir dans le réseau</button>
+      <button type="button" class="btn danger" id="detDel">Supprimer</button>
+    </div>
+    <div class="det-chords">${mesDraft.map((a,i)=>{
+      const v=voicings(a.pc,a.q,a.flat)[0];
+      const alts=alternatives(mesDraft[i-1],a,mesDraft[i+1]);
+      return `<div class="det-c" data-i="${i}">
+        <div class="det-n">${fmt(cname(a.pc,a.q,a.flat))}<span>${a.tag||""}</span></div>
+        ${v?diagram(v):""}
+        <div class="det-b">
+          <button type="button" data-mv="-1" data-i="${i}" title="Reculer">◀</button>
+          <button type="button" data-pl="${i}" title="Écouter">▸</button>
+          <button type="button" data-rm="${i}" title="Retirer">✕</button>
+          <button type="button" data-mv="1" data-i="${i}" title="Avancer">▶</button>
+        </div>
+        <div class="det-alt"><p>À la place</p>${alts.map((o,k)=>
+          `<button type="button" data-alt="${i}:${k}"><b>${cname(o.pc,o.q)}</b><em>${o.r}</em></button>`).join("")}</div>
+        <div hidden data-alts="${i}">${JSON.stringify(alts).replace(/"/g,"&quot;")}</div>
+      </div>`;}).join("")}</div>`;
+  $("#detBack").onclick=()=>{stopDet();mesOpen=null;renderMes();};
+  $("#detName").onchange=e=>renameGrid(item,e.target.value.trim()).then(()=>{item.nom=e.target.value.trim();});
+  $("#detPlay").onclick=e=>playList(mesDraft,".det-c",e.currentTarget);
+  $("#detLoop").onclick=()=>{
+    prog=mesDraft.map(a=>({pc:a.pc,q:a.q,flat:a.flat,tag:a.tag,frets:a.frets,
+      label:cname(a.pc,a.q,a.flat)}));
+    renderProg(); switchTab("harmonie"); window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
+  };
+  $("#detNet").onclick=()=>{
+    stopDet();
+    navPath=mesDraft.slice(0,-1).map(a=>({pc:a.pc,q:a.q,r:a.tag}));
+    const last=mesDraft[mesDraft.length-1];
+    if(last){navPc=last.pc;navQ=last.q;}
+    mesOpen=null; switchTab("reseau"); window.scrollTo({top:0,behavior:"smooth"});
+  };
+  $("#detDel").onclick=()=>confirmer("Supprimer « "+(item.nom||"sans nom")+" » ?",
+    "Les "+mesDraft.length+" accords de ce "+(item.kind==="chemin"?"chemin":"grille")+" seront effacés de la base. C'est définitif.",
+    ()=>{stopDet();deleteGrid(item).then(()=>{mesOpen=null;renderMes();});});
+  $("#mesList").querySelectorAll("[data-pl]").forEach(b=>b.onclick=()=>{
+    const a=mesDraft[+b.dataset.pl]; strum(a.frets);});
+  $("#mesList").querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i,j=i+ +b.dataset.mv; if(j<0||j>=mesDraft.length) return;
+    const t=mesDraft[i]; mesDraft[i]=mesDraft[j]; mesDraft[j]=t;
+    saveDraft(item).then(refresh);});
+  $("#mesList").querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{
+    if(mesDraft.length<=1){hint("Un chemin garde au moins un accord.");return;}
+    const a=mesDraft[+b.dataset.rm];
+    confirmer("Retirer "+cname(a.pc,a.q,a.flat)+" ?","Il disparaît de ce chemin ; le reste ne bouge pas.",
+      ()=>{mesDraft.splice(+b.dataset.rm,1);saveDraft(item).then(refresh);});});
+  $("#mesList").querySelectorAll("[data-alt]").forEach(b=>b.onclick=()=>{
+    const [i,k]=b.dataset.alt.split(":").map(Number);
+    const alts=JSON.parse($("#mesList").querySelector('[data-alts="'+i+'"]').textContent);
+    const o=alts[k],v=voicings(o.pc,o.q)[0];
+    mesDraft[i]={pc:o.pc,q:o.q,flat:false,tag:o.r,nom:cname(o.pc,o.q),frets:v?v.frets:[]};
+    if(v) strum(v.frets);
+    saveDraft(item).then(refresh);});
+}
+
 async function renderMes(){
   const all=await listGrids();
+  if(mesOpen){
+    const it=all.find(g=>g.id===mesOpen);
+    if(it) return renderDetail(it);
+    mesOpen=null;
+  }
   const list=all.filter(g=>mesFilter==="tout"||g.kind===mesFilter);
   $("#mesList").innerHTML=`
     <div class="work-controls" style="margin-bottom:14px">
@@ -1994,6 +2176,7 @@ async function renderMes(){
       <span class="mes-sum">${g.resume||summarize(g.accords||[])}</span>
       <span class="mes-kind">${g.tonique||""} ${g.mode==="min"?"min":"maj"}</span>
       ${g.createur?`<span class="mes-kind">${g.createur}</span>`:""}
+      <button type="button" class="btn small" data-open="${i}">Ouvrir</button>
       <button type="button" class="btn small" data-load="${i}">Charger</button>
       <button type="button" class="btn small" data-play="${i}">Écouter</button>
       <button type="button" class="btn small" data-del="${i}">Supprimer</button>
@@ -2013,7 +2196,13 @@ async function renderMes(){
     window.scrollTo({top:0,behavior:"smooth"});
   };
   $("#mesList").querySelectorAll("[data-load]").forEach(b=>b.onclick=()=>load(list[+b.dataset.load]));
-  $("#mesList").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>deleteGrid(list[+b.dataset.del]).then(renderMes));
+  $("#mesList").querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{
+    mesOpen=list[+b.dataset.open].id; renderMes();});
+  $("#mesList").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    const g=list[+b.dataset.del];
+    confirmer("Supprimer « "+(g.nom||"sans nom")+" » ?",
+      "Ce "+(g.kind==="chemin"?"chemin":"grille")+" de "+(g.accords||[]).length+" accords sera effacé de la base. C'est définitif.",
+      ()=>deleteGrid(g).then(renderMes));});
   $("#mesList").querySelectorAll("[data-fav]").forEach(b=>b.onclick=()=>favGrid(list[+b.dataset.fav]).then(renderMes));
   $("#mesList").querySelectorAll("[data-ren]").forEach(inp=>{
     inp.onchange=()=>renameGrid(list[+inp.dataset.ren],inp.value.trim()).then(renderMes);
