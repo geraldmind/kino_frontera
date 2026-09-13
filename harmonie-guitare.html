@@ -1,0 +1,753 @@
+<title>Harmonie au manche</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --ground:#13100E;
+  --panel:#1D1815;
+  --panel-2:#241E1A;
+  --line:#3B302A;
+  --line-soft:#2B2320;
+  --ink:#F4EBE1;
+  --ink-mute:#A79385;
+  --ink-dim:#7A6A5F;
+  --T:#E9A33C;
+  --SD:#63AFA2;
+  --D:#DA5F3C;
+  --C:#A585D6;
+  --display:"Fraunces",Georgia,"Times New Roman",serif;
+  --ui:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--ui);
+  font-size:15px;
+  line-height:1.55;
+  margin:0;
+  padding-block:0 56px;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px}
+a{color:var(--T)}
+
+/* ---------- en-tête ---------- */
+.top{
+  border-bottom:1px solid var(--line-soft);
+  background:linear-gradient(180deg,#1A1613 0%,var(--ground) 100%);
+  padding-block:28px 22px;
+}
+.eyebrow{
+  font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ink-dim);font-weight:600;margin:0 0 6px;
+}
+h1{
+  font-family:var(--display);
+  font-weight:600;
+  font-size:clamp(30px,5.2vw,46px);
+  line-height:1.02;
+  margin:0 0 10px;
+  text-wrap:balance;
+  letter-spacing:-.01em;
+}
+h1 em{font-style:italic;color:var(--T)}
+.lede{max-width:60ch;color:var(--ink-mute);margin:0 0 22px}
+
+.controls{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:7px}
+.field > span{
+  font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-dim);font-weight:600;
+}
+.roots{display:flex;flex-wrap:wrap;gap:4px}
+.roots button,.modes button{
+  font-family:var(--ui);font-size:13px;font-weight:600;
+  background:transparent;color:var(--ink-mute);
+  border:1px solid var(--line);border-radius:3px;
+  padding:6px 9px;cursor:pointer;min-width:36px;
+  transition:background .15s,color .15s,border-color .15s;
+}
+.roots button:hover,.modes button:hover{border-color:var(--T);color:var(--ink)}
+.roots button[aria-pressed="true"],.modes button[aria-pressed="true"]{
+  background:var(--T);border-color:var(--T);color:#1A1207;
+}
+.modes{display:flex;gap:4px}
+.modes button{min-width:82px}
+.sound{
+  display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-mute);
+  border:1px solid var(--line);border-radius:3px;padding:7px 11px;cursor:pointer;
+  background:transparent;font-family:var(--ui);font-weight:500;
+}
+.sound[aria-pressed="true"]{color:var(--ink);border-color:var(--SD)}
+.sound .dot{width:7px;height:7px;border-radius:50%;background:var(--ink-dim)}
+.sound[aria-pressed="true"] .dot{background:var(--SD);box-shadow:0 0 8px var(--SD)}
+
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--T);outline-offset:2px}
+
+/* ---------- grille principale ---------- */
+.board{display:grid;grid-template-columns:minmax(0,1fr) 372px;gap:26px;margin-top:26px;align-items:start}
+@media (max-width:940px){.board{grid-template-columns:minmax(0,1fr)}}
+
+.section-label{
+  font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-dim);font-weight:600;margin:0 0 10px;
+  display:flex;align-items:center;gap:10px;
+}
+.section-label::after{content:"";flex:1;height:1px;background:var(--line-soft)}
+
+.map-scroll{overflow-x:auto;overscroll-behavior-x:contain}
+.map-scroll svg{display:block;width:100%;min-width:640px;height:auto}
+.node{cursor:pointer}
+.node circle.bg{transition:opacity .15s}
+.node:hover circle.bg,.node:focus-visible circle.bg{opacity:1}
+.node text{pointer-events:none;font-family:var(--ui)}
+.node .name{font-weight:700}
+.node .deg{font-family:var(--mono);font-size:12px}
+.arrow{fill:none;stroke:var(--line);stroke-width:1.6}
+.arrow.strong{stroke:#5C4A40;stroke-width:2.2}
+.arrow.soft{stroke-dasharray:4 5}
+.axis-label{font-family:var(--ui);font-size:10.5px;letter-spacing:.16em;font-weight:600;text-transform:uppercase}
+
+/* ---------- emprunts ---------- */
+.colors{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{
+  font-family:var(--ui);font-size:13px;font-weight:600;
+  background:var(--panel);border:1px solid var(--line);
+  color:var(--ink);border-radius:999px;padding:6px 13px;cursor:pointer;
+  display:inline-flex;align-items:baseline;gap:7px;
+  transition:border-color .15s,background .15s;
+}
+.chip:hover{border-color:var(--C)}
+.chip small{font-family:var(--mono);font-size:10.5px;color:var(--ink-dim);font-weight:400}
+.chip[aria-pressed="true"]{background:#2A2135;border-color:var(--C)}
+
+/* ---------- panneau accord ---------- */
+.panel{
+  background:var(--panel);
+  border:1px solid var(--line-soft);
+  border-radius:4px;
+  padding:20px 18px 22px;
+  position:sticky;top:14px;
+  max-height:calc(100vh - 28px);
+  overflow-y:auto;
+}
+@media (max-width:940px){.panel{position:static;max-height:none}}
+.panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.chord-name{font-family:var(--display);font-size:40px;font-weight:600;line-height:1;margin:0}
+.chord-meta{font-family:var(--mono);font-size:12px;color:var(--ink-mute);margin:7px 0 0}
+.fn-badge{
+  font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;
+  padding:4px 9px;border-radius:2px;white-space:nowrap;
+}
+.role{color:var(--ink-mute);font-size:14px;margin:14px 0 0}
+.role strong{color:var(--ink);font-weight:600}
+.next{margin-top:16px}
+.next-chips{display:flex;flex-wrap:wrap;gap:5px}
+.next-chips button{
+  font-family:var(--ui);font-size:12.5px;font-weight:600;
+  background:transparent;border:1px solid var(--line);color:var(--ink-mute);
+  border-radius:3px;padding:5px 9px;cursor:pointer;
+}
+.next-chips button:hover{color:var(--ink);border-color:var(--T)}
+.panel-actions{display:flex;gap:6px;margin-top:16px}
+.btn{
+  font-family:var(--ui);font-size:13px;font-weight:600;cursor:pointer;
+  border-radius:3px;padding:8px 13px;border:1px solid var(--line);
+  background:transparent;color:var(--ink);
+}
+.btn:hover{border-color:var(--T)}
+.btn.primary{background:var(--T);border-color:var(--T);color:#1A1207}
+.btn.primary:hover{filter:brightness(1.08)}
+
+.voicing-group{margin-top:22px}
+.voicing-group > h3{
+  font-family:var(--ui);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-dim);font-weight:600;margin:0 0 4px;
+}
+.voicing-group > p{font-size:12.5px;color:var(--ink-dim);margin:0 0 12px}
+.voicings{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:12px}
+.voicing{
+  background:var(--panel-2);border:1px solid var(--line-soft);border-radius:3px;
+  padding:10px 10px 12px;display:flex;flex-direction:column;gap:8px;
+}
+.voicing:hover{border-color:var(--line)}
+.v-head{display:flex;align-items:baseline;justify-content:space-between;gap:6px}
+.v-name{font-weight:700;font-size:15px}
+.v-shape{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-dim);font-weight:600}
+.voicing svg{display:block;width:100%;height:auto;max-width:146px;margin:0 auto}
+.tab{
+  font-family:var(--mono);font-size:11px;line-height:1.35;color:var(--ink-mute);
+  white-space:pre;overflow-x:auto;margin:0;
+}
+.v-play{
+  font-family:var(--ui);font-size:11.5px;font-weight:600;cursor:pointer;
+  background:transparent;border:1px solid var(--line);color:var(--ink-mute);
+  border-radius:2px;padding:4px 0;
+}
+.v-play:hover{color:var(--ink);border-color:var(--SD)}
+
+/* ---------- progression ---------- */
+.prog{
+  margin-top:30px;background:var(--panel);border:1px solid var(--line-soft);
+  border-radius:4px;padding:18px;
+}
+.prog-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;min-height:44px}
+.prog-slot{
+  font-family:var(--ui);font-weight:700;font-size:15px;
+  border:1px solid var(--line);border-radius:3px;padding:7px 12px;
+  background:var(--panel-2);cursor:pointer;position:relative;
+}
+.prog-slot.playing{border-color:var(--T);background:#2E2313;color:var(--T)}
+.prog-slot small{display:block;font-family:var(--mono);font-size:10px;color:var(--ink-dim);font-weight:400}
+.prog-empty{color:var(--ink-dim);font-size:13.5px}
+.prog-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;align-items:center}
+.presets{display:flex;flex-wrap:wrap;gap:5px;margin-left:auto}
+.presets button{
+  font-family:var(--ui);font-size:12px;font-weight:600;background:transparent;
+  border:1px dashed var(--line);color:var(--ink-mute);border-radius:3px;padding:5px 9px;cursor:pointer;
+}
+.presets button:hover{color:var(--ink);border-style:solid;border-color:var(--SD)}
+
+/* ---------- notes d'harmonie ---------- */
+.notes{margin-top:44px;border-top:1px solid var(--line-soft);padding-top:30px}
+.notes h2{
+  font-family:var(--display);font-weight:600;font-size:26px;margin:0 0 6px;letter-spacing:-.01em;
+}
+.notes > p.intro{color:var(--ink-mute);max-width:62ch;margin:0 0 26px}
+.notes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:26px 34px}
+.note h3{
+  font-family:var(--ui);font-size:13px;font-weight:700;margin:0 0 7px;
+  color:var(--ink);display:flex;gap:9px;align-items:baseline;
+}
+.note h3 span{font-family:var(--mono);font-size:11px;color:var(--ink-dim);font-weight:400}
+.note p{margin:0 0 9px;font-size:14px;color:var(--ink-mute);max-width:60ch}
+.note code{font-family:var(--mono);font-size:12.5px;color:var(--T);background:#241C13;padding:1px 5px;border-radius:2px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin:0 0 24px}
+.legend div{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink-mute)}
+.legend i{width:11px;height:11px;border-radius:50%;display:block}
+footer{margin-top:40px;color:var(--ink-dim);font-size:12.5px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <p class="eyebrow">Brouillon · harmonie appliquée au manche</p>
+    <h1>Carte des accords <em>en mouvement</em></h1>
+    <p class="lede">Choisis une tonalité : la carte affiche les accords qui marchent ensemble, dans quel sens ils s'enchaînent, et la tablature exacte pour les jouer. Survole pour lire, clique pour ouvrir le doigté.</p>
+    <div class="controls">
+      <label class="field"><span>Tonique</span><div class="roots" id="roots"></div></label>
+      <label class="field"><span>Mode</span><div class="modes" id="modes">
+        <button type="button" data-mode="maj" aria-pressed="true">Majeur</button>
+        <button type="button" data-mode="min" aria-pressed="false">Mineur</button>
+      </div></label>
+      <button type="button" class="sound" id="sound" aria-pressed="false"><span class="dot"></span>Son</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="board">
+    <div>
+      <p class="section-label" id="mapLabel">Carte de Do majeur</p>
+      <div class="map-scroll"><div id="map"></div></div>
+
+      <p class="section-label" style="margin-top:22px">Couleurs &amp; emprunts</p>
+      <div class="colors" id="colors"></div>
+
+      <section class="prog" aria-label="Progression">
+        <p class="section-label" style="margin-bottom:8px">Ta progression</p>
+        <div class="prog-row" id="progRow"><span class="prog-empty">Clique « Ajouter » sur un accord — ou pars d'une grille toute faite.</span></div>
+        <div class="prog-actions">
+          <button type="button" class="btn primary" id="playProg">Jouer la grille</button>
+          <button type="button" class="btn" id="clearProg">Vider</button>
+          <div class="presets" id="presets"></div>
+        </div>
+      </section>
+    </div>
+
+    <aside class="panel" id="panel" aria-live="polite"></aside>
+  </div>
+
+  <section class="notes">
+    <h2>Comment ça marche</h2>
+    <p class="intro">Tout tient en une idée : dans une tonalité, chaque accord occupe une position sur une échelle de tension. La carte range les accords par <em>fonction</em>, et les flèches indiquent le sens où l'oreille veut aller.</p>
+    <div class="legend">
+      <div><i style="background:var(--T)"></i>Tonique — repos</div>
+      <div><i style="background:var(--SD)"></i>Sous-dominante — départ</div>
+      <div><i style="background:var(--D)"></i>Dominante — tension</div>
+      <div><i style="background:var(--C)"></i>Emprunt / dominante secondaire</div>
+    </div>
+    <div class="notes-grid">
+      <div class="note">
+        <h3>Les sept accords d'une tonalité <span>I ii iii IV V vi vii°</span></h3>
+        <p>On empile une note sur deux à partir de chaque degré de la gamme. En do majeur : <code>C Dm Em F G Am B°</code>. Rien d'autre n'est « obligatoire » — ces sept-là sonnent ensemble parce qu'ils ne contiennent que les sept notes de la gamme.</p>
+        <p>Les majuscules = accords majeurs, les minuscules = mineurs, le <code>°</code> = diminué (rare tel quel à la guitare, on le joue souvent en <code>m7♭5</code>).</p>
+      </div>
+      <div class="note">
+        <h3>Le cycle tension / repos <span>T → SD → D → T</span></h3>
+        <p>Trois familles : la <strong>tonique</strong> (I, iii, vi) c'est la maison ; la <strong>sous-dominante</strong> (ii, IV) éloigne ; la <strong>dominante</strong> (V, vii°) crée la tension qui veut retomber sur la tonique.</p>
+        <p>Tu peux avancer dans le sens des flèches sans réfléchir : ça marchera toujours. Reculer (V → IV par exemple) est possible, mais c'est déjà une couleur — c'est le son du rock et du blues.</p>
+      </div>
+      <div class="note">
+        <h3>Pourquoi V appelle I <span>triton</span></h3>
+        <p>L'accord de dominante contient deux notes séparées de trois tons (en do : <code>Si</code> et <code>Fa</code>) — un intervalle instable. Le Si veut monter au Do, le Fa veut descendre au Mi : les deux se résolvent d'un demi-ton dans l'accord de tonique. C'est le moteur de toute la musique tonale.</p>
+        <p>Ajoute la septième (<code>G7</code> au lieu de <code>G</code>) et l'appel devient encore plus net.</p>
+      </div>
+      <div class="note">
+        <h3>Les cadences <span>ponctuation</span></h3>
+        <p><strong>V → I</strong> : le point final. <strong>ii → V → I</strong> : la phrase complète, base du jazz. <strong>IV → I</strong> : le plagal, plus doux, sans traction (l'« amen »). <strong>V → vi</strong> : la cadence rompue — on attendait le repos, on tombe sur le relatif mineur, c'est le meilleur moyen de relancer un couplet.</p>
+      </div>
+      <div class="note">
+        <h3>Dominantes secondaires <span>V7/x</span></h3>
+        <p>Prends n'importe quel accord de la tonalité et fais-le précéder par <em>sa propre</em> dominante : en do, avant <code>Dm</code> on place <code>A7</code> (le V de ré mineur). L'accord sort de la gamme une seconde, puis tout retombe en place. C'est l'astuce la plus rentable pour sortir du champ des quatre accords sans se perdre.</p>
+      </div>
+      <div class="note">
+        <h3>Emprunts au mode mineur <span>iv, ♭VII, ♭VI</span></h3>
+        <p>On va chercher des accords dans la tonalité mineure de même tonique. Le <code>iv</code> mineur après le <code>IV</code> majeur, c'est l'effet « douceur triste » qu'on entend partout ; <code>♭VII</code> et <code>♭VI</code> donnent la couleur rock/modale (<code>C – ♭VII – IV</code>).</p>
+      </div>
+      <div class="note">
+        <h3>Septièmes et neuvièmes <span>couleur, pas fonction</span></h3>
+        <p>Elles ne changent pas le rôle d'un accord, elles changent sa densité. Règle simple dans une tonalité majeure : le I et le IV prennent <code>maj7</code>, le V prend <code>7</code>, les mineurs prennent <code>m7</code>, le vii° prend <code>m7♭5</code>.</p>
+        <p>Les <code>9</code> ajoutent une note de plus au sommet : le <code>add9</code> reste clair et ouvert (folk), le <code>9</code> avec septième sonne funk/soul, le <code>m9</code> sonne velours.</p>
+      </div>
+      <div class="note">
+        <h3>Sur le manche <span>formes mobiles</span></h3>
+        <p>Chaque diagramme ici vient soit d'un accord ouvert, soit d'une <strong>forme mobile</strong> : la forme E (fondamentale sur la corde de mi grave) et la forme A (fondamentale sur la corde de la). Apprends ces deux formes pour chaque qualité, et tu joues les douze tonalités en glissant la main.</p>
+        <p>Le chiffre à gauche du diagramme indique la case de départ. <code>×</code> = corde étouffée, <code>○</code> = corde à vide, la barre pleine = index qui barre.</p>
+      </div>
+    </div>
+    <footer>Brouillon de travail — accordage standard EADGBE. Les doigtés proposés sont les plus courants, pas les seuls.</footer>
+  </section>
+</main>
+
+<script>
+(function(){
+"use strict";
+
+/* ============ théorie ============ */
+const SHARP=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const FLAT =["C","D♭","D","E♭","E","F","G♭","G","A♭","A","B♭","B"];
+const ROOTS=[{pc:0,n:"C"},{pc:1,n:"C#/D♭"},{pc:2,n:"D"},{pc:3,n:"E♭"},{pc:4,n:"E"},{pc:5,n:"F"},
+             {pc:6,n:"F#/G♭"},{pc:7,n:"G"},{pc:8,n:"A♭"},{pc:9,n:"A"},{pc:10,n:"B♭"},{pc:11,n:"B"}];
+const FLAT_MAJ=[5,10,3,8,1,6], FLAT_MIN=[2,7,0,5,10,3,8,1];
+let useFlat=false;
+const spell=(pc,flat)=>((flat||useFlat)?FLAT:SHARP)[((pc%12)+12)%12];
+
+const QUAL={
+  maj   :{sfx:"",      iv:[0,4,7],       lab:"majeur"},
+  min   :{sfx:"m",     iv:[0,3,7],       lab:"mineur"},
+  dim   :{sfx:"°",     iv:[0,3,6],       lab:"diminué"},
+  "7"   :{sfx:"7",     iv:[0,4,7,10],    lab:"septième de dominante"},
+  maj7  :{sfx:"maj7",  iv:[0,4,7,11],    lab:"majeur septième"},
+  m7    :{sfx:"m7",    iv:[0,3,7,10],    lab:"mineur septième"},
+  m7b5  :{sfx:"m7♭5",  iv:[0,3,6,10],    lab:"demi-diminué"},
+  dim7  :{sfx:"°7",    iv:[0,3,6,9],     lab:"diminué septième"},
+  "9"   :{sfx:"9",     iv:[0,4,7,10,14], lab:"neuvième"},
+  maj9  :{sfx:"maj9",  iv:[0,4,7,11,14], lab:"majeur neuvième"},
+  m9    :{sfx:"m9",    iv:[0,3,7,10,14], lab:"mineur neuvième"},
+  add9  :{sfx:"add9",  iv:[0,4,7,14],    lab:"ajoutée neuvième"},
+  sus4  :{sfx:"sus4",  iv:[0,5,7],       lab:"suspendue"}
+};
+const cname=(pc,q,flat)=>spell(pc,flat)+QUAL[q].sfx;
+
+/* ============ manche ============ */
+const OPEN_PC=[4,9,2,7,11,4];            // mi la ré sol si mi (grave → aigu)
+const OPEN_MIDI=[40,45,50,55,59,64];
+const STR_LAB=["E","A","D","G","B","e"];
+
+const OPENS={
+ "C":"x32010","Cmaj7":"x32000","C7":"x32310","Cadd9":"x32030","C9":"x32333",
+ "D":"xx0232","Dm":"xx0231","D7":"xx0212","Dmaj7":"xx0222","Dm7":"xx0211","Dsus4":"xx0233",
+ "E":"022100","Em":"022000","E7":"020100","Emaj7":"021100","Em7":"020000","E9":"020102","Esus4":"022200",
+ "G":"320003","G7":"320001","Gmaj7":"320002",
+ "A":"x02220","Am":"x02210","A7":"x02020","Amaj7":"x02120","Am7":"x02010","Asus4":"x02230","Aadd9":"x02420",
+ "F":"133211","Fmaj7":"xx3210","Fm":"133111","B7":"x21202","Bm":"x24432","Bm7":"x20202"
+};
+const parseOpen=s=>s.split("").map(c=>c==="x"?null:+c);
+
+const SHAPES=[
+ {id:"E",root:0,tag:"forme E",name:"Barré forme E",q:{
+   maj :{o:[0,2,2,1,0,0],   f:[1,3,4,2,1,1]},
+   min :{o:[0,2,2,0,0,0],   f:[1,3,4,1,1,1]},
+   "7" :{o:[0,2,0,1,0,0],   f:[1,3,1,2,1,1]},
+   maj7:{o:[0,2,1,1,0,0],   f:[1,4,2,3,1,1]},
+   m7  :{o:[0,2,0,0,0,0],   f:[1,3,1,1,1,1]},
+   "9" :{o:[0,2,0,1,0,2],   f:[1,3,1,2,1,4]},
+   m9  :{o:[0,2,0,0,0,2],   f:[1,3,1,1,1,4]},
+   maj9:{o:[0,2,1,1,0,2],   f:[1,3,2,2,1,4]},
+   add9:{o:[0,2,2,1,0,2],   f:[1,3,4,2,1,4]},
+   m7b5:{o:[0,1,0,0,null,null],f:[1,2,1,1]},
+   dim :{o:[0,1,2,0,null,null],f:[1,2,3,1]},
+   sus4:{o:[0,2,2,2,0,0],   f:[1,3,4,4,1,1]}
+ }},
+ {id:"A",root:1,tag:"forme A",name:"Barré forme A",q:{
+   maj :{o:[null,0,2,2,2,0],f:[0,1,3,3,3,1]},
+   min :{o:[null,0,2,2,1,0],f:[0,1,3,4,2,1]},
+   "7" :{o:[null,0,2,0,2,0],f:[0,1,3,1,4,1]},
+   maj7:{o:[null,0,2,1,2,0],f:[0,1,3,2,4,1]},
+   m7  :{o:[null,0,2,0,1,0],f:[0,1,3,1,2,1]},
+   m7b5:{o:[null,0,1,0,1,null],f:[0,1,2,1,3]},
+   dim :{o:[null,0,1,2,1,null],f:[0,1,2,4,3]},
+   "9" :{o:[null,0,-1,0,0,0],f:[0,2,1,3,3,3]},
+   m9  :{o:[null,0,-2,0,0,0],f:[0,3,1,4,4,4]},
+   maj9:{o:[null,0,-1,1,0,null],f:[0,2,1,4,3]},
+   add9:{o:[null,0,2,4,2,0],f:[0,1,2,4,3,1]},
+   sus4:{o:[null,0,2,2,3,0],f:[0,1,3,4,4,1]}
+ }},
+ {id:"D",root:2,tag:"forme D",name:"Forme D (aigu)",q:{
+   maj :{o:[null,null,0,2,3,2],f:[0,0,1,2,4,3]},
+   min :{o:[null,null,0,2,3,1],f:[0,0,1,3,4,2]},
+   "7" :{o:[null,null,0,2,1,2],f:[0,0,1,3,2,4]},
+   m7  :{o:[null,null,0,2,1,1],f:[0,0,1,3,2,2]},
+   maj7:{o:[null,null,0,2,2,2],f:[0,0,1,2,3,4]},
+   dim7:{o:[null,null,0,1,0,1],f:[0,0,1,2,1,3]}
+ }}
+];
+
+function build(pc,q,shape,flat){
+  const def=shape.q[q]; if(!def) return null;
+  let base=(((pc-OPEN_PC[shape.root])%12)+12)%12;
+  let frets=def.o.map(o=>o===null?null:o+base);
+  const played=frets.filter(f=>f!==null);
+  if(Math.min.apply(null,played)<0){ base+=12; frets=def.o.map(o=>o===null?null:o+base); }
+  if(Math.max.apply(null,frets.filter(f=>f!==null))>15){ base-=12; frets=def.o.map(o=>o===null?null:o+base); }
+  return {frets,fingers:def.f,shape:shape.tag,shapeName:shape.name,barre:base>0&&shape.id!=="D",barreFret:base,name:cname(pc,q,flat)};
+}
+function voicings(pc,q,flat){
+  const out=[];
+  const key=SHARP[((pc%12)+12)%12]+QUAL[q].sfx.replace("♭","b");
+  if(OPENS[key]) out.push({frets:parseOpen(OPENS[key]),fingers:null,shape:"accord ouvert",shapeName:"Position ouverte",barre:false,name:cname(pc,q,flat)});
+  SHAPES.forEach(s=>{const v=build(pc,q,s,flat); if(v&&!out.some(o=>o.frets.join()===v.frets.join())) out.push(v);});
+  return out;
+}
+
+/* ============ diagrammes & tab ============ */
+function diagram(v){
+  const W=132,H=176,left=17,right=117,top=40,rows=5,rowH=25,colW=(right-left)/5;
+  const played=v.frets.filter(f=>f!==null&&f>0);
+  let base=1;
+  if(played.length){const mn=Math.min.apply(null,played),mx=Math.max.apply(null,played);
+    if(mx>5){base=mn; if(mx-base>4) base=mx-4;}}
+  const x=i=>left+i*colW, fy=n=>top+(n-0.5)*rowH;
+  let s=`<svg viewBox="-14 0 ${W+14} ${H}" role="img" aria-label="Diagramme ${v.name}">`;
+  for(let i=0;i<6;i++) s+=`<line x1="${x(i)}" y1="${top}" x2="${x(i)}" y2="${top+rows*rowH}" stroke="#5A4B42" stroke-width="1"/>`;
+  for(let r=0;r<=rows;r++) s+=`<line x1="${left}" y1="${top+r*rowH}" x2="${right}" y2="${top+r*rowH}" stroke="#4A3D36" stroke-width="1"/>`;
+  if(base===1) s+=`<rect x="${left-1}" y="${top-5}" width="${right-left+2}" height="5" fill="#C9B8A8" rx="1"/>`;
+  else s+=`<text x="${left-12}" y="${fy(1)+4}" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="11" fill="#A79385">${base}</text>`;
+  v.frets.forEach((f,i)=>{
+    if(f===null) s+=`<text x="${x(i)}" y="${top-9}" text-anchor="middle" font-size="12" fill="#7A6A5F" font-family="Archivo, sans-serif">×</text>`;
+    else if(f===0) s+=`<circle cx="${x(i)}" cy="${top-13}" r="4.2" fill="none" stroke="#C9B8A8" stroke-width="1.3"/>`;
+  });
+  if(v.barre){
+    const idx=v.frets.map((f,i)=>f===v.barreFret?i:-1).filter(i=>i>=0);
+    if(idx.length>1){const a=Math.min.apply(null,idx),b=Math.max.apply(null,idx),y=fy(v.barreFret-base+1);
+      s+=`<rect x="${x(a)-8}" y="${y-8}" width="${x(b)-x(a)+16}" height="16" rx="8" fill="#E9A33C"/>`;}
+  }
+  v.frets.forEach((f,i)=>{
+    if(f===null||f===0) return;
+    const pos=f-base+1; if(pos<1||pos>rows) return;
+    const isB=v.barre&&f===v.barreFret;
+    if(!isB) s+=`<circle cx="${x(i)}" cy="${fy(pos)}" r="8" fill="#E9A33C"/>`;
+    const fg=v.fingers&&v.fingers[i];
+    if(fg) s+=`<text x="${x(i)}" y="${fy(pos)+3.8}" text-anchor="middle" font-size="10" font-weight="700" fill="#1A1207" font-family="Archivo, sans-serif">${fg}</text>`;
+  });
+  return s+"</svg>";
+}
+function tab(v){
+  return v.frets.map((f,i)=>({i,f})).reverse()
+    .map(o=>`${STR_LAB[o.i]}|--${o.f===null?"x":o.f}${String(o.f).length>1&&o.f!==null?"":"-"}--`)
+    .join("\n");
+}
+
+/* ============ son ============ */
+let AC=null,soundOn=false;
+function pluck(midi,t,gain){
+  const o=AC.createOscillator(),g=AC.createGain(),lp=AC.createBiquadFilter();
+  o.type="triangle"; o.frequency.value=440*Math.pow(2,(midi-69)/12);
+  lp.type="lowpass"; lp.frequency.setValueAtTime(3200,t); lp.frequency.exponentialRampToValueAtTime(700,t+1.4);
+  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(gain,t+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+1.9);
+  o.connect(lp).connect(g).connect(AC.destination); o.start(t); o.stop(t+2);
+}
+function strum(frets,when){
+  if(!soundOn) return;
+  if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)();
+  if(AC.state==="suspended") AC.resume();
+  const t0=(when||AC.currentTime)+0.02; let k=0;
+  frets.forEach((f,i)=>{ if(f===null) return; pluck(OPEN_MIDI[i]+f,t0+k*0.032,0.11); k++; });
+}
+
+/* ============ tonalités ============ */
+const MAJ=[
+ {d:"I",   s:0, q:"maj", fn:"T",  slot:"tm"},
+ {d:"ii",  s:2, q:"min", fn:"SD", slot:"sd2"},
+ {d:"iii", s:4, q:"min", fn:"T",  slot:"td"},
+ {d:"IV",  s:5, q:"maj", fn:"SD", slot:"sd1"},
+ {d:"V",   s:7, q:"maj", fn:"D",  slot:"d1"},
+ {d:"vi",  s:9, q:"min", fn:"T",  slot:"tu"},
+ {d:"vii°",s:11,q:"dim", fn:"D",  slot:"d2"}
+];
+const MIN=[
+ {d:"i",   s:0, q:"min", fn:"T",  slot:"tm"},
+ {d:"ii°", s:2, q:"dim", fn:"SD", slot:"sd2"},
+ {d:"III", s:3, q:"maj", fn:"T",  slot:"tu"},
+ {d:"iv",  s:5, q:"min", fn:"SD", slot:"sd1"},
+ {d:"V",   s:7, q:"maj", fn:"D",  slot:"d1"},
+ {d:"VI",  s:8, q:"maj", fn:"T",  slot:"td"},
+ {d:"VII", s:10,q:"maj", fn:"D",  slot:"d2"}
+];
+const SLOT={tm:{x:148,y:212,r:47},tu:{x:148,y:88,r:38},td:{x:148,y:336,r:38},
+            sd1:{x:418,y:140,r:40},sd2:{x:418,y:288,r:40},
+            d1:{x:688,y:140,r:40},d2:{x:688,y:288,r:38}};
+const FLOW_MAJ=[["I","IV",-38],["I","ii",22],["I","vi",-20],["vi","ii",30],["iii","vi",-24],
+  ["IV","V",-26],["ii","V",26],["V","I",-92,"strong"],["vii°","I",96],["IV","I",56,"soft"],["V","vi",70,"soft"]];
+const FLOW_MIN=[["i","iv",-38],["i","ii°",22],["i","VII",-16],["III","VI",26],["VI","iv",-30],
+  ["iv","V",-26],["ii°","V",26],["V","i",-92,"strong"],["VII","i",96],["iv","i",56,"soft"],["VI","VII",-46]];
+
+const FN_COL={T:"var(--T)",SD:"var(--SD)",D:"var(--D)",C:"var(--C)"};
+const FN_LAB={T:"Tonique",SD:"Sous-dominante",D:"Dominante",C:"Emprunt"};
+
+const ROLE_MAJ={
+ "I":"Le point de repos. Tout peut y revenir et tout peut en partir — commence et finis dessus tant que tu cherches encore la couleur du morceau.",
+ "ii":"Le meilleur tremplin vers la dominante. <strong>ii → V → I</strong> est la phrase la plus utilisée de toute la musique occidentale ; en m7 elle sonne immédiatement jazz.",
+ "iii":"Le degré ambigu : il partage deux notes avec le I et deux avec le V. Sert surtout de passage entre I et vi, ou d'entrée vers vi.",
+ "IV":"Le grand départ. Il éloigne de la tonique sans créer de tension. En maj7 il sonne large et lumineux ; c'est l'accord des refrains.",
+ "V":"La tension. Ajoute-lui la septième (V7) et il devient impossible de finir ailleurs que sur le I. Le suspendre (sus4) retarde encore un peu la chute.",
+ "vi":"Le relatif mineur : mêmes notes que le I, humeur inverse. Souvent le vrai centre des morceaux « tristes » écrits en majeur.",
+ "vii°":"Une dominante sans fondamentale. Rare telle quelle à la guitare : joue-la en <strong>m7♭5</strong> ou remplace-la simplement par le V7."
+};
+const ROLE_MIN={
+ "i":"Le repos, en mineur. Le m7 l'adoucit, le m9 le rend velours ; laissé en triade il reste dur et net.",
+ "ii°":"Le tremplin mineur vers la dominante. On le joue quasiment toujours en <strong>m7♭5</strong> : ii°ø → V7 → i.",
+ "III":"Le relatif majeur : la porte de sortie lumineuse. Beaucoup de morceaux mineurs partent en III pour le refrain.",
+ "iv":"La sous-dominante mineure, très sombre. iv → i est la cadence plagale mineure, celle des fins suspendues.",
+ "V":"La dominante majeure vient du mineur harmonique (on monte la 7e d'un demi-ton). C'est elle qui rend la résolution vers i vraiment tranchante — sans elle, l'harmonie reste modale.",
+ "VI":"Accord large et consolant. VI → VII → i est le retour modal typique (Andalouse, rock mineur).",
+ "VII":"La dominante du relatif majeur. VII → III éclaire, VII → i reste modal et flottant, sans note sensible."
+};
+const NEXT_MAJ={"I":["IV","V","vi","ii"],"ii":["V","vii°","I"],"iii":["vi","IV","ii"],"IV":["V","I","ii"],
+ "V":["I","vi","IV"],"vi":["ii","IV","V","iii"],"vii°":["I","iii"]};
+const NEXT_MIN={"i":["iv","V","VI","VII"],"ii°":["V","i"],"III":["VI","iv","VII"],"iv":["V","i","VII"],
+ "V":["i","VI"],"VI":["VII","iv","III"],"VII":["III","i","VI"]};
+
+function colorChords(tonic,mode,deg){
+  const at=d=>deg.find(x=>x.d===d), out=[];
+  const sec=(target,lbl)=>{const t=at(target); if(!t) return;
+    out.push({pc:(tonic+t.s+7)%12,q:"7",tag:"V7/"+target,fn:"C",
+      role:`La dominante de <strong>${cname((tonic+t.s)%12,t.q)}</strong>. Place-la juste avant lui : l'oreille entend une micro-modulation, puis tout retombe dans la tonalité.`,
+      next:[target]});};
+  if(mode==="maj"){
+    ["ii","iii","IV","V","vi"].forEach(d=>sec(d));
+    out.push({pc:(tonic+5)%12,q:"min",tag:"iv emprunté",fn:"C",
+      role:"Le IV passé en mineur, emprunté à la tonalité mineure. <strong>IV → iv → I</strong> : l'effet « ça se serre » qu'on entend dans mille ballades.",next:["I","V"]});
+    out.push({pc:(tonic+10)%12,q:"maj",tag:"♭VII",fn:"C",flat:true,
+      role:"Sous-dominante modale (mixolydien). <strong>I – ♭VII – IV</strong> : le cliché rock par excellence, aucune tension, juste de la couleur.",next:["IV","I"]});
+    out.push({pc:(tonic+8)%12,q:"maj",tag:"♭VI",fn:"C",flat:true,
+      role:"Emprunt sombre et large. Superbe juste avant le ♭VII ou le V, pour remonter vers la tonique.",next:["V","IV"]});
+    out.push({pc:(tonic+3)%12,q:"maj",tag:"♭III",fn:"C",flat:true,
+      role:"Emprunt au mineur parallèle, très « cinéma ». Fonctionne bien enchaîné ♭III – ♭VI – ♭VII – I.",next:["IV","I"]});
+    out.push({pc:tonic,q:"7",tag:"I7 (blues)",fn:"C",
+      role:"La tonique avec une septième mineure : hors gamme, mais c'est la base du blues. Elle pousse vers le IV.",next:["IV"]});
+  }else{
+    out.push({pc:(tonic+7)%12,q:"7",tag:"V7 harmonique",fn:"C",
+      role:"La dominante avec septième, tirée du mineur harmonique. La résolution la plus forte vers i.",next:["i","VI"]});
+    out.push({pc:(tonic+11)%12,q:"dim7",tag:"vii°7",fn:"C",
+      role:"Un V7 sans fondamentale : même tension, son plus dramatique. Se résout d'un demi-ton vers i.",next:["i"]});
+    out.push({pc:(tonic+1)%12,q:"maj",tag:"♭II napolitain",fn:"C",flat:true,
+      role:"L'accord napolitain, un demi-ton au-dessus de la tonique. Placé avant le V, il donne une couleur savante immédiate.",next:["V"]});
+    out.push({pc:(tonic+5)%12,q:"maj",tag:"IV dorien",fn:"C",
+      role:"Le iv passé en majeur : couleur dorienne, moins triste, très soul et très folk celtique.",next:["i","VII"]});
+    out.push({pc:(tonic+10)%12,q:"7",tag:"♭VII7",fn:"C",flat:true,
+      role:"La dominante du III : elle éclaire vers le relatif majeur, ou revient simplement en i.",next:["III","i"]});
+    out.push({pc:(tonic+3)%12,q:"7",tag:"V7/VI",fn:"C",
+      role:"La dominante du VI. Un détour d'un accord avant de retomber sur la partie large du morceau.",next:["VI"]});
+  }
+  return out;
+}
+
+/* ============ état ============ */
+let tonic=0,mode="maj",degrees=MAJ,colors=[],current=null,prog=[];
+
+function setFlats(){useFlat = mode==="maj" ? FLAT_MAJ.indexOf(tonic)>=0 : FLAT_MIN.indexOf(tonic)>=0;}
+const $=s=>document.querySelector(s);
+
+/* ---- sélecteurs ---- */
+const rootsEl=$("#roots");
+ROOTS.forEach(r=>{const b=document.createElement("button");b.type="button";b.textContent=r.n;
+  b.dataset.pc=r.pc;b.setAttribute("aria-pressed",String(r.pc===tonic));
+  b.onclick=()=>{tonic=r.pc;render();};rootsEl.appendChild(b);});
+$("#modes").onclick=e=>{const b=e.target.closest("button"); if(!b) return; mode=b.dataset.mode; render();};
+$("#sound").onclick=e=>{soundOn=!soundOn;e.currentTarget.setAttribute("aria-pressed",String(soundOn));
+  if(soundOn&&!AC){AC=new (window.AudioContext||window.webkitAudioContext)();}};
+
+/* ---- carte ---- */
+function nodeAt(d){const g=degrees.find(x=>x.d===d);return g?SLOT[g.slot]:null;}
+function arrow(a,b,bend,cls){
+  const A=nodeAt(a),B=nodeAt(b); if(!A||!B) return "";
+  const dx=B.x-A.x,dy=B.y-A.y,L=Math.hypot(dx,dy),ux=dx/L,uy=dy/L;
+  const sx=A.x+ux*(A.r+3),sy=A.y+uy*(A.r+3),ex=B.x-ux*(B.r+11),ey=B.y-uy*(B.r+11);
+  const mx=(sx+ex)/2-uy*bend,my=(sy+ey)/2+ux*bend;
+  return `<path class="arrow ${cls||""}" d="M${sx.toFixed(1)} ${sy.toFixed(1)} Q${mx.toFixed(1)} ${my.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}" marker-end="url(#ah)"/>`;
+}
+function renderMap(){
+  const flow=mode==="maj"?FLOW_MAJ:FLOW_MIN;
+  let s=`<svg viewBox="0 0 840 420" role="group" aria-label="Carte des accords de la tonalité">
+   <defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+     <path d="M0 0 L10 5 L0 10 z" fill="#6B584C"/></marker></defs>
+   <text x="148" y="386" text-anchor="middle" class="axis-label" fill="#7A6A5F">Repos</text>
+   <text x="418" y="386" text-anchor="middle" class="axis-label" fill="#7A6A5F">Départ</text>
+   <text x="688" y="386" text-anchor="middle" class="axis-label" fill="#7A6A5F">Tension</text>`;
+  flow.forEach(f=>s+=arrow(f[0],f[1],f[2],f[3]));
+  degrees.forEach(g=>{
+    const p=SLOT[g.slot],col=FN_COL[g.fn],pc=(tonic+g.s)%12,nm=cname(pc,g.q);
+    s+=`<g class="node" data-deg="${g.d}" tabindex="0" role="button" aria-label="${nm}, degré ${g.d}">
+      <circle class="bg" cx="${p.x}" cy="${p.y}" r="${p.r}" fill="${col}" opacity="0.13"/>
+      <circle cx="${p.x}" cy="${p.y}" r="${p.r}" fill="none" stroke="${col}" stroke-width="${g.slot==="tm"?2.4:1.6}"/>
+      <text class="name" x="${p.x}" y="${p.y+2}" text-anchor="middle" font-size="${g.slot==="tm"?24:20}" fill="#F4EBE1">${nm}</text>
+      <text class="deg" x="${p.x}" y="${p.y+(g.slot==="tm"?22:19)}" text-anchor="middle" fill="${col}">${g.d}</text>
+    </g>`;
+  });
+  $("#map").innerHTML=s+"</svg>";
+  $("#map").querySelectorAll(".node").forEach(n=>{
+    const d=n.dataset.deg;
+    n.addEventListener("click",()=>selectDegree(d));
+    n.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();selectDegree(d);}});
+    n.addEventListener("mouseenter",()=>selectDegree(d,true));
+  });
+}
+function renderColors(){
+  $("#colors").innerHTML=colors.map((c,i)=>
+    `<button type="button" class="chip" data-ci="${i}"><span>${cname(c.pc,c.q,c.flat)}</span><small>${c.tag}</small></button>`).join("");
+  $("#colors").querySelectorAll("button").forEach(b=>{
+    const i=+b.dataset.ci;
+    b.addEventListener("click",()=>selectColor(i));
+    b.addEventListener("mouseenter",()=>selectColor(i,true));
+  });
+}
+
+/* ---- panneau ---- */
+function extrasFor(q){
+  if(q==="maj") return ["maj7","7","add9","9"];
+  if(q==="min") return ["m7","m9"];
+  if(q==="dim") return ["m7b5","dim7"];
+  if(q==="7")   return ["9","sus4"];
+  if(q==="dim7")return ["m7b5"];
+  return [];
+}
+function vcard(v){
+  return `<div class="voicing">
+    <div class="v-head"><span class="v-name">${v.name}</span><span class="v-shape">${v.shape}</span></div>
+    ${diagram(v)}
+    <pre class="tab">${tab(v)}</pre>
+    <button type="button" class="v-play" data-frets="${v.frets.map(f=>f===null?"x":f).join(",")}">écouter</button>
+  </div>`;
+}
+function renderPanel(ch){
+  current=ch;
+  const nm=cname(ch.pc,ch.q,ch.flat), col=FN_COL[ch.fn];
+  const main=voicings(ch.pc,ch.q,ch.flat);
+  const extras=[];
+  extrasFor(ch.q).forEach(q=>{const vs=voicings(ch.pc,q,ch.flat); if(vs[0]) extras.push(vs[0]); if(vs[1]&&vs[0].shape==="accord ouvert") extras.push(vs[1]);});
+  const nextBtns=(ch.next||[]).map(d=>{
+    const g=degrees.find(x=>x.d===d);
+    return g?`<button type="button" data-next="${d}">${cname((tonic+g.s)%12,g.q)} <span style="color:${FN_COL[g.fn]}">${d}</span></button>`:"";
+  }).join("");
+  $("#panel").innerHTML=`
+    <div class="panel-head">
+      <div><h2 class="chord-name">${nm}</h2>
+      <p class="chord-meta">${ch.tag||("degré "+ch.d)} · ${QUAL[ch.q].lab} · ${QUAL[ch.q].iv.map(i=>spell(ch.pc+i,ch.flat)).join(" ")}</p></div>
+      <span class="fn-badge" style="background:${col};color:#16110D">${FN_LAB[ch.fn]}</span>
+    </div>
+    <p class="role">${ch.role||""}</p>
+    ${nextBtns?`<div class="next"><p class="section-label" style="margin-bottom:7px">Enchaîner vers</p><div class="next-chips">${nextBtns}</div></div>`:""}
+    <div class="panel-actions">
+      <button type="button" class="btn primary" id="addProg">Ajouter à la grille</button>
+      <button type="button" class="btn" id="playChord">Écouter</button>
+    </div>
+    <div class="voicing-group"><h3>Doigtés</h3><p>Positions les plus jouables pour cet accord.</p>
+      <div class="voicings">${main.map(vcard).join("")}</div></div>
+    ${extras.length?`<div class="voicing-group"><h3>Septièmes &amp; neuvièmes</h3>
+      <p>Même fonction, plus de couleur — remplace l'accord tel quel.</p>
+      <div class="voicings">${extras.map(vcard).join("")}</div></div>`:""}`;
+  const first=main[0];
+  $("#playChord").onclick=()=>strum(first.frets);
+  $("#addProg").onclick=()=>{prog.push({pc:ch.pc,q:ch.q,flat:ch.flat,tag:ch.tag||ch.d,frets:first.frets});renderProg();};
+  $("#panel").querySelectorAll(".v-play").forEach(b=>b.onclick=()=>
+    strum(b.dataset.frets.split(",").map(v=>v==="x"?null:+v)));
+  $("#panel").querySelectorAll("[data-next]").forEach(b=>b.onclick=()=>selectDegree(b.dataset.next));
+}
+function selectDegree(d,hover){
+  const g=degrees.find(x=>x.d===d); if(!g) return;
+  const roles=mode==="maj"?ROLE_MAJ:ROLE_MIN, nexts=mode==="maj"?NEXT_MAJ:NEXT_MIN;
+  document.querySelectorAll(".chip").forEach(c=>c.setAttribute("aria-pressed","false"));
+  renderPanel({pc:(tonic+g.s)%12,q:g.q,fn:g.fn,d:g.d,role:roles[d],next:nexts[d]});
+  if(!hover) strum(voicings((tonic+g.s)%12,g.q)[0].frets);
+}
+function selectColor(i,hover){
+  const c=colors[i];
+  document.querySelectorAll(".chip").forEach((el,j)=>el.setAttribute("aria-pressed",String(j===i)));
+  renderPanel(c);
+  if(!hover) strum(voicings(c.pc,c.q)[0].frets);
+}
+
+/* ---- progression ---- */
+function renderProg(){
+  const row=$("#progRow");
+  if(!prog.length){row.innerHTML='<span class="prog-empty">Clique « Ajouter » sur un accord — ou pars d\'une grille toute faite.</span>';return;}
+  row.innerHTML=prog.map((p,i)=>
+    `<button type="button" class="prog-slot" data-pi="${i}" title="Retirer">${cname(p.pc,p.q,p.flat)}<small>${p.tag}</small></button>`).join("");
+  row.querySelectorAll("button").forEach(b=>b.onclick=()=>{prog.splice(+b.dataset.pi,1);renderProg();});
+}
+$("#clearProg").onclick=()=>{prog=[];renderProg();};
+$("#playProg").onclick=()=>{
+  if(!prog.length) return;
+  if(!soundOn){soundOn=true;$("#sound").setAttribute("aria-pressed","true");}
+  if(!AC) AC=new (window.AudioContext||window.webkitAudioContext)();
+  if(AC.state==="suspended") AC.resume();
+  const t0=AC.currentTime+0.05,step=1.15,slots=$("#progRow").querySelectorAll(".prog-slot");
+  prog.forEach((p,i)=>{
+    strum(p.frets,t0+i*step);
+    setTimeout(()=>{slots.forEach(s=>s.classList.remove("playing"));if(slots[i])slots[i].classList.add("playing");},i*step*1000);
+  });
+  setTimeout(()=>slots.forEach(s=>s.classList.remove("playing")),prog.length*step*1000+400);
+};
+const PRESETS_MAJ=[
+ {n:"I – V – vi – IV",d:["I","V","vi","IV"]},
+ {n:"ii – V – I",d:["ii","V","I"]},
+ {n:"I – vi – IV – V",d:["I","vi","IV","V"]},
+ {n:"Cadence rompue",d:["I","IV","V","vi"]}
+];
+const PRESETS_MIN=[
+ {n:"i – VI – III – VII",d:["i","VI","III","VII"]},
+ {n:"ii° – V – i",d:["ii°","V","i"]},
+ {n:"Andalouse",d:["i","VII","VI","V"]},
+ {n:"i – iv – V",d:["i","iv","V"]}
+];
+function renderPresets(){
+  const list=mode==="maj"?PRESETS_MAJ:PRESETS_MIN;
+  $("#presets").innerHTML=list.map((p,i)=>`<button type="button" data-pr="${i}">${p.n}</button>`).join("");
+  $("#presets").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+    const p=list[+b.dataset.pr];
+    prog=p.d.map(d=>{const g=degrees.find(x=>x.d===d),pc=(tonic+g.s)%12;
+      return {pc,q:g.q,tag:d,frets:voicings(pc,g.q)[0].frets};});
+    renderProg();
+  });
+}
+
+/* ---- rendu global ---- */
+function render(){
+  degrees = mode==="maj"?MAJ:MIN;
+  setFlats();
+  colors=colorChords(tonic,mode,degrees);
+  rootsEl.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.pc===tonic)));
+  $("#modes").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.mode===mode)));
+  $("#mapLabel").textContent="Carte de "+spell(tonic)+(mode==="maj"?" majeur":" mineur");
+  renderMap(); renderColors(); renderPresets();
+  selectDegree(degrees[0].d,true);
+  prog=[]; renderProg();
+}
+render();
+})();
+</script>
