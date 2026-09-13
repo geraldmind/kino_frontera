@@ -1368,19 +1368,21 @@ function renderPresets(){
   });
 }
 
-/* ---- mémoire : base Airtable « Guitare — Harmonie », table Grilles ----
-   Les appels passent par le connecteur Airtable du lecteur : aucune clé
-   d'API ne circule dans cette page. Formats vérifiés sur la vraie base —
-   les enregistrements reviennent dans cellValuesByFieldId, et un champ
-   « choix unique » est un objet en lecture, une chaîne en écriture.     */
+/* ---- mémoire ----------------------------------------------------------
+   Trois dos possibles, choisis au chargement, du meilleur au plus modeste :
+     api   — le site Netlify : /api/grilles parle à Airtable côté serveur,
+             le jeton reste sur le serveur et ne descend jamais ici ;
+     mcp   — l'aperçu en artefact : le connecteur Airtable du lecteur ;
+     local — fichier ouvert seul ou réseau coupé : le navigateur.
+   Le même fichier HTML sert dans les trois cas.                          */
 const AIR={base:"appnzisvARTfJG5di",table:"tbl23cy3ggY7kLm3s",
   F:{nom:"fldzzmFKhw34Vxgf9",resume:"fldyGMCDmOZcAL6tY",tonique:"fldIFK6OLzTDKxwBy",
      mode:"fldPXqsKnYfyIOPvU",tempo:"fldqzbmaYNATiG3Ek",accords:"fld6tGANI4kwrhene",
      notes:"fldJ62kd9jV7Do9XN",cree:"fldrQ7MTEkN2YFJph",
      type:"fldzvnALAQlpNnrdl",createur:"fldw8cBgQkQIYmafW",favori:"fldKEEcrVrrPFFN88"}};
 const CREATEURS=["Gérald","Axel","Jean-Louis Durand"];
-const LS_KEY="harmonie-grilles";
-let MCP=null,airOK=false,createur=CREATEURS[0];
+const LS_KEY="harmonie-grilles",API="/api/grilles";
+let MCP=null,backend="local",createur=CREATEURS[0];
 const ERRS={
  needs_reauth:"Connexion Airtable expirée. Reconnecte Airtable dans claude.ai › Réglages › Connecteurs.",
  server_not_connected:"Airtable n'est pas connecté sur ce compte. Ajoute-le dans claude.ai › Réglages › Connecteurs.",
@@ -1390,32 +1392,40 @@ const ERRS={
  approval_required:"Airtable demande une approbation qui n'a pas encore été donnée."
 };
 function hint(t){ const h=$("#saveHint"); if(h) h.textContent=t; const m=$("#mesHint"); if(m) m.textContent=t; }
+function fellBack(msg){ backend="local"; hint(msg+" Les enregistrements restent dans ce navigateur."); }
+
+/* --- navigateur --- */
+function localGrids(){ try{return JSON.parse(localStorage.getItem(LS_KEY)||"[]");}catch(e){return [];} }
+function localSet(l){ try{localStorage.setItem(LS_KEY,JSON.stringify(l));}catch(e){} }
+
+/* --- site : fonction serverless --- */
+async function apiCall(method,body,id){
+  const r=await fetch(API+(id?"?id="+encodeURIComponent(id):""),{
+    method,headers:body?{"content-type":"application/json"}:undefined,
+    body:body?JSON.stringify(body):undefined});
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(data.error||("Le serveur a répondu "+r.status));
+  return data;
+}
+
+/* --- artefact : connecteur du lecteur --- */
 function airMsg(e){
   if(!e) return null;
   if(ERRS[e.code]) return ERRS[e.code];
   if(e.code==="tool_error") return "Airtable a refusé l'opération : "+(e.message||"");
   return null;
 }
-function airDown(e){
-  hint((airMsg(e)||"Airtable injoignable pour l'instant.")+" Les enregistrements restent dans ce navigateur.");
-  airOK=false;
-}
-function localGrids(){ try{return JSON.parse(localStorage.getItem(LS_KEY)||"[]");}catch(e){return [];} }
-function localSet(l){ try{localStorage.setItem(LS_KEY,JSON.stringify(l));}catch(e){} }
-
-async function airCall(tool,input,isRetry){
-  try{
-    const r=await MCP.callTool("Airtable",tool,input);
-    return r&&r.payload;
-  }catch(e){
+async function mcpCall(tool,input,isRetry){
+  try{ const r=await MCP.callTool("Airtable",tool,input); return r&&r.payload; }
+  catch(e){
     if(e&&e.retryable&&!isRetry&&tool==="list_records_for_table"){
       await new Promise(z=>setTimeout(z,500+Math.random()*500));
-      return airCall(tool,input,true);
+      return mcpCall(tool,input,true);
     }
     throw e;
   }
 }
-const cellName=v=>(v&&typeof v==="object")?v.name:v;      // choix unique : objet en lecture
+const cellName=v=>(v&&typeof v==="object")?v.name:v;   // choix unique : objet en lecture
 function fromRecord(r){
   const f=r.cellValuesByFieldId||r.fields||{};
   let acc=[]; try{acc=JSON.parse(f[AIR.F.accords]||"[]");}catch(e){acc=[];}
@@ -1431,20 +1441,36 @@ function recordsOf(p){
   if(p.data&&Array.isArray(p.data.records)) return p.data.records;
   return [];
 }
+function mcpFields(b,partial){
+  const f={};
+  if(b.nom!==undefined) f[AIR.F.nom]=b.nom;
+  if(b.resume!==undefined) f[AIR.F.resume]=b.resume;
+  if(b.tonique!==undefined) f[AIR.F.tonique]=b.tonique;
+  if(b.mode!==undefined) f[AIR.F.mode]=b.mode==="min"?"mineur":"majeur";
+  if(b.kind!==undefined) f[AIR.F.type]=b.kind;
+  if(b.createur!==undefined) f[AIR.F.createur]=b.createur;
+  if(b.favori!==undefined) f[AIR.F.favori]=!!b.favori;
+  if(b.tempo!==undefined) f[AIR.F.tempo]=b.tempo;
+  if(b.accords!==undefined) f[AIR.F.accords]=JSON.stringify(b.accords);
+  if(!partial) f[AIR.F.cree]=new Date().toISOString();
+  return f;
+}
+
+/* --- interface commune --- */
+function sortItems(l){ return l.slice().sort((a,b)=>(b.favori?1:0)-(a.favori?1:0)); }
 async function listGrids(){
-  if(airOK&&MCP){
+  if(backend==="api"){
+    try{ return sortItems((await apiCall("GET")).items||[]); }
+    catch(e){ fellBack(e.message); }
+  }else if(backend==="mcp"){
     try{
-      const p=await airCall("list_records_for_table",{baseId:AIR.base,tableId:AIR.table,pageSize:60,
+      const p=await mcpCall("list_records_for_table",{baseId:AIR.base,tableId:AIR.table,pageSize:60,
         fieldIds:[AIR.F.nom,AIR.F.resume,AIR.F.tonique,AIR.F.mode,AIR.F.type,AIR.F.createur,AIR.F.favori,AIR.F.accords,AIR.F.cree],
         sort:[{fieldId:AIR.F.cree,direction:"desc"}]});
-      const list=recordsOf(p).map(r=>{try{return fromRecord(r);}catch(e){return null;}}).filter(Boolean);
-      list.sort((a,b)=>(b.favori?1:0)-(a.favori?1:0));      // les favoris d'abord
-      return list;
-    }catch(e){ airDown(e); }
+      return sortItems(recordsOf(p).map(r=>{try{return fromRecord(r);}catch(e){return null;}}).filter(Boolean));
+    }catch(e){ fellBack(airMsg(e)||"Airtable injoignable pour l'instant."); }
   }
-  const l=localGrids().slice().reverse();
-  l.sort((a,b)=>(b.favori?1:0)-(a.favori?1:0));
-  return l;
+  return sortItems(localGrids().slice().reverse());
 }
 function packItems(items){
   return items.map(a=>({tag:a.tag,pc:a.pc,q:a.q,flat:!!a.flat,
@@ -1453,44 +1479,48 @@ function packItems(items){
 async function saveItem(kind,name,items){
   if(!items.length) return;
   const accords=packItems(items),resume=accords.map(a=>a.nom).join(" – ");
-  const local={id:"l"+Date.now(),nom:name,resume,tonique:spell(tonic),mode,kind,
-               createur,favori:false,accords};
-  if(airOK&&MCP){
-    const f={};
-    f[AIR.F.nom]=name; f[AIR.F.resume]=resume; f[AIR.F.tonique]=spell(tonic);
-    f[AIR.F.mode]=mode==="maj"?"majeur":"mineur"; f[AIR.F.type]=kind;
-    f[AIR.F.createur]=createur; f[AIR.F.favori]=false; f[AIR.F.tempo]=bpm;
-    f[AIR.F.accords]=JSON.stringify(accords); f[AIR.F.cree]=new Date().toISOString();
+  const body={kind,nom:name,resume,tonique:spell(tonic),mode,createur,favori:false,tempo:bpm,accords};
+  if(backend==="api"){
+    try{ await apiCall("POST",body); hint("« "+name+" » enregistré ("+createur+")."); return; }
+    catch(e){ fellBack(e.message); }
+  }else if(backend==="mcp"){
     try{
-      await airCall("create_records_for_table",{baseId:AIR.base,tableId:AIR.table,records:[{fields:f}]});
-      hint("« "+name+" » enregistré dans Airtable ("+createur+").");
-    }catch(e){ airDown(e); localSet(localGrids().concat([local])); }
-  }else localSet(localGrids().concat([local]));
-}
-async function patchGrid(g,fields,localPatch){
-  if(String(g.id).charAt(0)==="l"||!airOK||!MCP){
-    const l=localGrids().map(x=>x.id===g.id?Object.assign({},x,localPatch):x);
-    localSet(l); return;
+      await mcpCall("create_records_for_table",{baseId:AIR.base,tableId:AIR.table,
+        records:[{fields:mcpFields(body)}]});
+      hint("« "+name+" » enregistré dans Airtable ("+createur+")."); return;
+    }catch(e){ fellBack(airMsg(e)||"Airtable injoignable pour l'instant."); }
   }
-  try{ await airCall("update_records_for_table",{baseId:AIR.base,tableId:AIR.table,
-    records:[{id:g.id,fields:fields}]}); }
-  catch(e){ airDown(e); }
+  localSet(localGrids().concat([Object.assign({id:"l"+Date.now()},body)]));
+  hint("« "+name+" » enregistré dans ce navigateur.");
 }
-function renameGrid(g,name){
-  if(!name||name===g.nom) return Promise.resolve();
-  const f={}; f[AIR.F.nom]=name;
-  return patchGrid(g,f,{nom:name}).then(()=>hint("Renommé : « "+name+" »."));
+async function patchGrid(g,patch){
+  if(String(g.id).charAt(0)!=="l"){
+    if(backend==="api"){
+      try{ await apiCall("PATCH",patch,g.id); return; }catch(e){ fellBack(e.message); }
+    }else if(backend==="mcp"){
+      try{ await mcpCall("update_records_for_table",{baseId:AIR.base,tableId:AIR.table,
+        records:[{id:g.id,fields:mcpFields(patch,true)}]}); return; }
+      catch(e){ fellBack(airMsg(e)||"Airtable injoignable pour l'instant."); }
+    }
+  }
+  localSet(localGrids().map(x=>x.id===g.id?Object.assign({},x,patch):x));
 }
-function favGrid(g){
-  const f={}; f[AIR.F.favori]=!g.favori;
-  return patchGrid(g,f,{favori:!g.favori});
+function renameGrid(g,nom){
+  if(!nom||nom===g.nom) return Promise.resolve();
+  return patchGrid(g,{nom}).then(()=>hint("Renommé : « "+nom+" »."));
 }
+function favGrid(g){ return patchGrid(g,{favori:!g.favori}); }
 async function deleteGrid(g){
-  if(String(g.id).charAt(0)==="l"||!airOK||!MCP) localSet(localGrids().filter(x=>x.id!==g.id));
-  else{
-    try{ await airCall("delete_records_for_table",{baseId:AIR.base,tableId:AIR.table,recordIds:[g.id]}); }
-    catch(e){ airDown(e); }
+  if(String(g.id).charAt(0)!=="l"){
+    if(backend==="api"){
+      try{ await apiCall("DELETE",null,g.id); return; }catch(e){ fellBack(e.message); }
+    }else if(backend==="mcp"){
+      try{ await mcpCall("delete_records_for_table",{baseId:AIR.base,tableId:AIR.table,
+        recordIds:[g.id]}); return; }
+      catch(e){ fellBack(airMsg(e)||"Airtable injoignable pour l'instant."); }
+    }
   }
+  localSet(localGrids().filter(x=>x.id!==g.id));
 }
 function saveGrid(){
   const name=($("#saveName").value||"").trim()||("Grille en "+spell(tonic)+(mode==="maj"?" majeur":" mineur"));
@@ -1991,13 +2021,26 @@ render();
 renderFretboard();
 renderSaved();
 
-/* Airtable comme backend ; repli sur le navigateur si le connecteur n'est pas joignable */
-if(window.claude&&window.claude.use){
-  window.claude.use("mcp").then(m=>{
-    if(m){MCP=m;airOK=true;hint("Mémoire branchée sur ta base Airtable « Guitare — Harmonie ».");}
-    else hint("Airtable n'est pas disponible dans cette vue — tout est enregistré dans ce navigateur.");
-    renderSaved(); if(!$("#view-mes").hidden) renderMes();
-  }).catch(()=>{hint("Grilles enregistrées dans ce navigateur.");});
-}else hint("Grilles enregistrées dans ce navigateur.");
+/* Où enregistrer ? On essaie le site, puis l'artefact, puis le navigateur. */
+(async function pickBackend(){
+  if(location.protocol==="http:"||location.protocol==="https:"){
+    try{
+      const r=await fetch(API,{method:"GET"});
+      if(r.ok){ await r.json(); backend="api";
+        hint("Mémoire branchée sur la base Airtable du site.");
+        renderSaved(); if(!$("#view-mes").hidden) renderMes(); return; }
+    }catch(e){}
+  }
+  if(window.claude&&window.claude.use){
+    try{
+      const m=await window.claude.use("mcp");
+      if(m){ MCP=m; backend="mcp";
+        hint("Mémoire branchée sur ta base Airtable « Guitare — Harmonie ».");
+        renderSaved(); if(!$("#view-mes").hidden) renderMes(); return; }
+    }catch(e){}
+  }
+  hint("Enregistrements gardés dans ce navigateur.");
+  renderSaved(); if(!$("#view-mes").hidden) renderMes();
+})();
 })();
 </script>
