@@ -104,7 +104,7 @@ function toFields(body, { partial } = {}) {
   if (body.resume !== undefined) f[F.resume] = str(body.resume, 500);
   if (body.tonique !== undefined) f[F.tonique] = str(body.tonique, 8);
   if (body.mode !== undefined) f[F.mode] = body.mode === "min" ? "mineur" : "majeur";
-  if (body.kind !== undefined) f[F.type] = body.kind === "chemin" ? "chemin" : "grille";
+  if (body.kind !== undefined) f[F.type] = ["chemin","grille","accord"].includes(body.kind) ? body.kind : "grille";
   if (body.createur !== undefined && CREATEURS.includes(body.createur)) f[F.createur] = body.createur;
   if (body.favori !== undefined) f[F.favori] = !!body.favori;
   if (body.notes !== undefined) f[F.notes] = str(body.notes, 4000);
@@ -149,7 +149,7 @@ export default async (req) => {
       const body = await req.json();
       const data = await airtable(`${BASE}/${TABLE}`, {
         method: "POST",
-        body: JSON.stringify({ records: [{ fields: toFields(body) }], returnFieldsByFieldId: true })
+        body: JSON.stringify({ records: [{ fields: toFields(body) }], returnFieldsByFieldId: true, typecast: true })
       });
       return json({ item: toItem(data.records[0]) }, 201);
     }
@@ -159,7 +159,7 @@ export default async (req) => {
       const body = await req.json();
       const data = await airtable(`${BASE}/${TABLE}`, {
         method: "PATCH",
-        body: JSON.stringify({ records: [{ id, fields: toFields(body, { partial: true }) }], returnFieldsByFieldId: true })
+        body: JSON.stringify({ records: [{ id, fields: toFields(body, { partial: true }) }], returnFieldsByFieldId: true, typecast: true })
       });
       return json({ item: toItem(data.records[0]) });
     }

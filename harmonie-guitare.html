@@ -309,6 +309,17 @@ dialog#ask::backdrop{background:rgba(10,7,5,.62)}
 .mes-kind{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:3px 8px;border-radius:2px;background:var(--panel-3);color:var(--ink-mute)}
 .mes-kind.chemin{background:var(--C-deep);color:var(--C)}
 .mes-kind.grille{background:var(--T-deep);color:var(--T)}
+.mes-kind.accord{background:var(--SD-deep);color:var(--SD)}
+.fb-cell{fill:transparent;cursor:pointer}
+.fb-cell:hover{fill:var(--T);opacity:.16}
+.id-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.id-row{display:flex;align-items:baseline;gap:10px;padding:9px 11px;border:1px solid var(--line-soft);border-radius:4px;background:var(--panel-2);cursor:pointer;text-align:left;width:100%;font-family:var(--ui)}
+.id-row:hover{border-color:var(--T)}
+.id-row.best{border-color:var(--T);background:var(--T-deep)}
+.id-n{font-weight:700;font-size:19px;min-width:92px}
+.id-w{font-size:12px;color:var(--ink-mute);flex:1}
+.id-s{font-family:var(--mono);font-size:10.5px;color:var(--ink-dim)}
+#idCard .notes-played{font-family:var(--mono);font-size:12.5px;color:var(--ink-mute);margin:0}
 /* notes */
 .notes{margin-top:44px;border-top:1px solid var(--line-soft);padding-top:30px}
 .notes h2{font-family:var(--display);font-weight:600;font-size:26px;margin:0 0 6px;letter-spacing:-.01em}
@@ -354,6 +365,7 @@ footer{margin-top:40px;color:var(--ink-dim);font-size:12.5px}
       <button type="button" role="tab" id="tab-travail" aria-selected="false" aria-controls="view-travail">Travail des gammes</button>
       <button type="button" role="tab" id="tab-reseau" aria-selected="false" aria-controls="view-reseau">Réseau des accords</button>
       <button type="button" role="tab" id="tab-accords" aria-selected="false" aria-controls="view-accords">Dictionnaire d'accords</button>
+      <button type="button" role="tab" id="tab-trouver" aria-selected="false" aria-controls="view-trouver">Trouver un accord</button>
       <button type="button" role="tab" id="tab-mes" aria-selected="false" aria-controls="view-mes">Mes chemins</button>
     </div>
   </div>
@@ -539,6 +551,35 @@ footer{margin-top:40px;color:var(--ink-dim);font-size:12.5px}
     </label>
   </div>
   <div id="dict"></div>
+</section>
+
+<section id="view-trouver" role="tabpanel" aria-labelledby="tab-trouver" hidden>
+  <p class="map-note" style="margin:0 0 16px">Pose tes doigts sur le manche : clique une case par corde, reclique pour l'enlever, et utilise la colonne de gauche pour ouvrir <b>○</b> ou étouffer <b>×</b> une corde. La page te dit ce que tu joues — avec les autres lectures possibles, parce qu'un même paquet de notes porte souvent plusieurs noms.</p>
+  <div class="fb-scroll"><div id="builder"></div></div>
+  <div class="work-grid" style="margin-top:18px">
+    <div class="card" id="idCard"></div>
+    <div class="card">
+      <h3>Garder cet accord</h3>
+      <p>Il rejoindra « Mes chemins », avec son doigté exact et le nom que tu lui donnes.</p>
+      <div class="prog-actions" style="margin-top:0">
+        <input type="text" id="newName" placeholder="Nom de l'accord" maxlength="40">
+        <button type="button" class="btn primary" id="saveChord">Enregistrer</button>
+      </div>
+      <div class="prog-actions">
+        <button type="button" class="btn" id="playBuilt">Écouter</button>
+        <button type="button" class="btn" id="builtToLoop">Vers la boucle</button>
+        <button type="button" class="btn" id="clearBuilt">Tout enlever</button>
+      </div>
+      <div class="drill">
+        <h4>Repères</h4>
+        <ol>
+          <li><b>Une corde, une case.</b> Cliquer ailleurs sur la même corde déplace le doigt.</li>
+          <li><b>La basse compte.</b> La note la plus grave change le nom : mêmes notes, autre basse, autre accord.</li>
+          <li><b>Plusieurs noms.</b> Les lectures sont classées par vraisemblance ; celle du haut est la plus probable, pas la seule vraie.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
 </section>
 
 <section id="view-mes" role="tabpanel" aria-labelledby="tab-mes" hidden>
@@ -1058,6 +1099,7 @@ function applyTheme(t,rerender){
     renderFretboard();
     if(!$("#view-reseau").hidden){renderNav();renderPath();}
     if(!$("#view-accords").hidden) renderChords();
+    if(!$("#view-trouver").hidden) renderBuilder();
   }
 }
 $("#theme").onclick=()=>applyTheme(currentTheme()==="dark"?"light":"dark",true);
@@ -1077,15 +1119,17 @@ $("#tab-harmonie").onclick=()=>switchTab("harmonie");
 $("#tab-travail").onclick=()=>switchTab("travail");
 $("#tab-reseau").onclick=()=>switchTab("reseau");
 $("#tab-accords").onclick=()=>switchTab("accords");
+$("#tab-trouver").onclick=()=>switchTab("trouver");
 $("#tab-mes").onclick=()=>switchTab("mes");
 function switchTab(name){
-  ["harmonie","travail","reseau","accords","mes"].forEach(n=>{
+  ["harmonie","travail","reseau","accords","trouver","mes"].forEach(n=>{
     $("#tab-"+n).setAttribute("aria-selected",String(n===name));
     $("#view-"+n).hidden = n!==name;
   });
   if(name==="travail") renderFretboard(); else stopScale();
   if(name==="reseau"){renderNav();renderPath();} else stopPath();
   if(name==="accords") renderChords();
+  if(name==="trouver") renderBuilder();
   if(name==="mes") renderMes(); else stopDet();
 }
 
@@ -1372,7 +1416,7 @@ const AIR={base:"appnzisvARTfJG5di",table:"tbl23cy3ggY7kLm3s",
      notes:"fldJ62kd9jV7Do9XN",cree:"fldrQ7MTEkN2YFJph",
      type:"fldzvnALAQlpNnrdl",createur:"fldw8cBgQkQIYmafW",favori:"fldKEEcrVrrPFFN88"}};
 const CREATEURS=["Gérald","Axel","Jean-Louis Durand"];
-const LS_KEY="harmonie-grilles",API="/api/grilles",BUILD="13";
+const LS_KEY="harmonie-grilles",API="/api/grilles",BUILD="14";
 let MCP=null,backend="local",createur=CREATEURS[0];
 const ERRS={
  needs_reauth:"Connexion Airtable expirée. Reconnecte Airtable dans claude.ai › Réglages › Connecteurs.",
@@ -1477,7 +1521,7 @@ async function saveItem(kind,name,items){
   }else if(backend==="mcp"){
     try{
       await mcpCall("create_records_for_table",{baseId:AIR.base,tableId:AIR.table,
-        records:[{fields:mcpFields(body)}]});
+        records:[{fields:mcpFields(body)}],typecast:true});
       hint("« "+name+" » enregistré dans Airtable ("+createur+")."); return;
     }catch(e){ fellBack(airMsg(e)||"Airtable injoignable pour l'instant."); }
   }
@@ -1490,7 +1534,7 @@ async function patchGrid(g,patch){
       try{ await apiCall("PATCH",patch,g.id); return; }catch(e){ fellBack(e.message); }
     }else if(backend==="mcp"){
       try{ await mcpCall("update_records_for_table",{baseId:AIR.base,tableId:AIR.table,
-        records:[{id:g.id,fields:mcpFields(patch,true)}]}); return; }
+        records:[{id:g.id,fields:mcpFields(patch,true)}],typecast:true}); return; }
       catch(e){ fellBack(airMsg(e)||"Airtable injoignable pour l'instant."); }
     }
   }
@@ -1953,6 +1997,137 @@ function renderChords(){
   $("#dictRoots").onclick=e=>{const b=e.target.closest("button"); if(!b) return; dictPc=+b.dataset.pc; renderChords();};
   $("#dictFam").onchange=e=>{dictFam=e.target.value;renderChords();};
 })();
+
+/* ===================== trouver un accord au manche =====================
+   On part des notes posées, pas d'un nom. Pour chaque fondamentale possible
+   on compare le paquet de notes joué au paquet attendu, en pénalisant les
+   notes en trop plus que les notes absentes — une quinte omise est banale à
+   la guitare, une note étrangère beaucoup moins. La basse départage.      */
+const ID_TABLE=[
+ ["maj",[0,4,7]],["min",[0,3,7]],["dim",[0,3,6]],["aug",[0,4,8]],
+ ["7",[0,4,7,10]],["maj7",[0,4,7,11]],["m7",[0,3,7,10]],["m7b5",[0,3,6,10]],
+ ["dim7",[0,3,6,9]],["6",[0,4,7,9]],["m6",[0,3,7,9]],
+ ["sus2",[0,2,7]],["sus4",[0,5,7]],["7s4",[0,5,7,10]],
+ ["add9",[0,2,4,7]],["9",[0,2,4,7,10]],["maj9",[0,2,4,7,11]],["m9",[0,2,3,7,10]],
+ ["69",[0,2,4,7,9]],["13",[0,4,7,9,10]],["7s9",[0,3,4,7,10]],["7b9",[0,1,4,7,10]]
+];
+let builder=[null,null,null,null,null,null],idBest=null;
+
+function identify(frets){
+  const midis=frets.map((f,i)=>f===null?null:OPEN_MIDI[i]+f).filter(x=>x!==null);
+  if(midis.length<2) return [];
+  const bass=Math.min.apply(null,midis)%12;
+  const played={}; midis.forEach(m=>played[m%12]=1);
+  const pcs=Object.keys(played).map(Number);
+  const out=[];
+  for(let r=0;r<12;r++) ID_TABLE.forEach(([q,iv])=>{
+    const target=iv.map(i=>(r+i)%12);
+    const missing=target.filter(t=>pcs.indexOf(t)<0);
+    const extra=pcs.filter(pc=>target.indexOf(pc)<0);
+    let sc=100-20*extra.length-1.2*target.length;
+    missing.forEach(t=>{
+      const deg=((t-r)%12+12)%12;
+      sc-= deg===7?4 : deg===0?9 : (deg===3||deg===4)?13 : 11;
+    });
+    if(bass===r) sc+=7;                       /* position fondamentale */
+    if(extra.length===0&&missing.length===0) sc+=10;
+    out.push({pc:r,q,sc,bass,missing,extra});
+  });
+  out.sort((a,b)=>b.sc-a.sc);
+  const seen={},res=[];
+  out.forEach(o=>{const k=o.pc+"|"+o.q; if(seen[k]||res.length>=4||o.sc<28) return; seen[k]=1; res.push(o);});
+  return res;
+}
+function idLabel(o){
+  const n=cname(o.pc,o.q);
+  return o.bass!==o.pc ? n+"/"+spell(o.bass) : n;
+}
+function idWhy(o){
+  const bits=[];
+  if(o.bass!==o.pc) bits.push("renversement, "+spell(o.bass)+" à la basse");
+  if(o.missing.length){
+    const noms=o.missing.map(t=>{const d=((t-o.pc)%12+12)%12;
+      return d===7?"la quinte":d===0?"la fondamentale":(d===3||d===4)?"la tierce":spell(t);});
+    bits.push("sans "+noms.join(" ni "));
+  }
+  if(o.extra.length) bits.push(o.extra.map(x=>spell(x)).join(", ")+" en plus");
+  return bits.length?bits.join(" · "):"toutes les notes y sont";
+}
+function renderBuilder(){
+  const NF=15,nutX=74,fw=52,W=nutX+NF*fw+26,rowH=32,topY=30,H=topY+5*rowH+52;
+  const sy=t=>topY+(5-t)*rowH, fx=f=>nutX+(f-0.5)*fw;
+  let g=`<svg viewBox="0 0 ${W} ${H}" role="group" aria-label="Manche : pose tes doigts">`;
+  g+=`<rect x="${nutX}" y="${topY-10}" width="${NF*fw}" height="${5*rowH+20}" fill="${PAL.wood}"/>`;
+  [3,5,7,9,15].forEach(f=>{g+=`<circle cx="${fx(f)}" cy="${topY+2.5*rowH}" r="7" fill="${PAL.inlay}"/>`;});
+  g+=`<circle cx="${fx(12)}" cy="${topY+1.5*rowH}" r="7" fill="${PAL.inlay}"/><circle cx="${fx(12)}" cy="${topY+3.5*rowH}" r="7" fill="${PAL.inlay}"/>`;
+  for(let f=1;f<=NF;f++) g+=`<line x1="${nutX+f*fw}" y1="${topY-10}" x2="${nutX+f*fw}" y2="${topY+5*rowH+10}" stroke="${PAL.fret}" stroke-width="1.5"/>`;
+  g+=`<rect x="${nutX-5}" y="${topY-11}" width="6" height="${5*rowH+22}" fill="${PAL.nut}" rx="1"/>`;
+  for(let t=0;t<6;t++){
+    g+=`<line x1="${nutX-34}" y1="${sy(t)}" x2="${nutX+NF*fw}" y2="${sy(t)}" stroke="${PAL.string}" stroke-width="${0.8+t*0.28}"/>`;
+    g+=`<text x="${nutX-56}" y="${sy(t)+4}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="${PAL.dim}">${STR_LAB[t]}</text>`;
+    const st=builder[t];
+    const mark = st===null?"×" : st===0?"○" : "•";
+    g+=`<text class="fb-mark" data-mute="${t}" x="${nutX-40}" y="${sy(t)+5}" text-anchor="middle" font-size="14" font-weight="700" style="cursor:pointer" fill="${st===null?PAL.D:st===0?PAL.T:PAL.dim}"><title>${st===null?"Corde étouffée — cliquer pour l'ouvrir":"Cliquer pour étouffer cette corde"}</title>${mark}</text>`;
+    if(st!==null&&st>0) g+=`<circle cx="${fx(st)}" cy="${sy(t)}" r="12" fill="${PAL.T}"/>
+      <text x="${fx(st)}" y="${sy(t)+4}" text-anchor="middle" font-size="11" font-weight="700" fill="${PAL.onAcc}" font-family="Archivo, sans-serif">${st}</text>`;
+    if(st===0) g+=`<circle cx="${nutX-18}" cy="${sy(t)}" r="8" fill="none" stroke="${PAL.T}" stroke-width="2"/>`;
+    for(let f=1;f<=NF;f++)
+      g+=`<rect class="fb-cell" data-s="${t}" data-f="${f}" x="${nutX+(f-1)*fw}" y="${sy(t)-rowH/2}" width="${fw}" height="${rowH}"/>`;
+    g+=`<rect class="fb-cell" data-s="${t}" data-f="0" x="${nutX-30}" y="${sy(t)-rowH/2}" width="25" height="${rowH}"/>`;
+  }
+  for(let f=1;f<=NF;f++) g+=`<text x="${fx(f)}" y="${topY+5*rowH+34}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11.5" fill="${[3,5,7,9,12,15].indexOf(f)>=0?PAL.mute:PAL.fret}">${f}</text>`;
+  $("#builder").innerHTML=g+"</svg>";
+  $("#builder").querySelectorAll(".fb-cell").forEach(c=>c.onclick=()=>{
+    const t=+c.dataset.s,f=+c.dataset.f;
+    builder[t]=builder[t]===f?null:f;
+    if(builder[t]!==null) note(OPEN_MIDI[t]+builder[t],undefined,0.12);
+    renderBuilder();
+  });
+  $("#builder").querySelectorAll("[data-mute]").forEach(c=>c.onclick=()=>{
+    const t=+c.dataset.mute;
+    builder[t]=builder[t]===null?0:null;
+    renderBuilder();
+  });
+  renderId();
+}
+function renderId(){
+  const res=identify(builder),n=builder.filter(f=>f!==null).length;
+  idBest=res[0]||null;
+  const midis=builder.map((f,i)=>f===null?null:OPEN_MIDI[i]+f).filter(x=>x!==null).sort((a,b)=>a-b);
+  $("#idCard").innerHTML = n<2
+    ? `<h3>Pose au moins deux notes</h3><p>Clique une case par corde. Chaque clic joue la note ; l'analyse se fait toute seule.</p>`
+    : `<h3>${res.length?fmt(idLabel(res[0])):"Accord non identifié"}</h3>
+       <p class="notes-played">Notes, du grave à l'aigu : ${midis.map(m=>spell(m%12)).join(" · ")}</p>
+       ${res.length?`<p>${idWhy(res[0])}.</p>
+       <div class="id-list">${res.map((o,i)=>
+         `<button type="button" class="id-row${i?"":" best"}" data-id="${i}">
+            <span class="id-n">${fmt(idLabel(o))}</span>
+            <span class="id-w">${QUAL[o.q].lab} — ${idWhy(o)}</span>
+            <span class="id-s">${Math.round(o.sc)}</span>
+          </button>`).join("")}</div>
+       <p style="margin-top:12px;color:var(--ink-dim);font-size:12.5px">Clique une lecture pour l'ouvrir dans le réseau des accords et voir où elle mène.</p>`
+       :`<p>Ce paquet de notes ne correspond à aucun accord courant. Ça ne veut pas dire que c'est faux — juste qu'il n'a pas de nom simple.</p>`}`;
+  $("#idCard").querySelectorAll("[data-id]").forEach(b=>b.onclick=()=>{
+    const o=res[+b.dataset.id];
+    navPc=o.pc; navQ=o.q; navPath=[];
+    switchTab("reseau"); window.scrollTo({top:0,behavior:"smooth"});
+  });
+}
+$("#playBuilt").onclick=()=>strum(builder);
+$("#clearBuilt").onclick=()=>{builder=[null,null,null,null,null,null];renderBuilder();};
+$("#builtToLoop").onclick=()=>{
+  if(!idBest){hint("Pose d'abord un accord identifiable.");return;}
+  prog.push({pc:idBest.pc,q:idBest.q,tag:"au manche",label:idLabel(idBest),frets:builder.slice()});
+  renderProg(); strum(builder); switchTab("harmonie");
+  window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"});
+};
+$("#saveChord").onclick=()=>{
+  if(builder.filter(f=>f!==null).length<2){hint("Pose au moins deux notes.");return;}
+  const nom=($("#newName").value||"").trim()||(idBest?idLabel(idBest):"Accord sans nom");
+  const it={pc:idBest?idBest.pc:0,q:idBest?idBest.q:"maj",tag:idBest?idLabel(idBest):"au manche",
+            label:nom,frets:builder.slice()};
+  saveItem("accord",nom,[it]).then(()=>{$("#newName").value="";if(!$("#view-mes").hidden)renderMes();});
+};
 
 /* ===================== mes chemins & grilles ===================== */
 function summarize(items){ return items.map(a=>a.nom||cname(a.pc,a.q,a.flat)).join(" – "); }
